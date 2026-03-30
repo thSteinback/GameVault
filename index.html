@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameVault</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div style="display: flex; align-items: center;">
+        <a href="index.html">
+          <img src="imagens/logoGV.png" alt="Logo GameVault" class="logo">
+        </a>
+        <h1>GameVault</h1>
+    </div>
+    <nav>
+        <button id="abrirLogin">Conecte-se</button>
+        <button id="abrirCadastro">Criar conta</button>
+        <a href="favoritos.html"><button>Favoritos</button></a>
+        <a href="jogos.html"><button>Jogos</button></a>
+        <a href="#"><button id="btnPerfil">Perfil</button></a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="banner">
+      <div class="carousel">
+        <img src="imagens/tlou2-banner.png" class="slide active">
+        <img src="imagens/tlou2r-banner.jpg" class="slide">
+        <img src="imagens/tlou1-banner.png" class="slide">
+        <div class="indicators">
+          <span class="dot active" onclick="goToSlide(0)"></span>
+          <span class="dot" onclick="goToSlide(1)"></span>
+          <span class="dot" onclick="goToSlide(2)"></span>
+        </div>
+      </div>
+    </section>
+
+    <h2 class="titulo">Jogos mais avaliados</h2>
+    <div class="carrossel-wrapper" id="carrossel-wrapper">
+      <button class="nav left" id="navLeft">&#10094;</button>
+      <div class="carrossel" id="carrossel">
+        <img src="imagens/tlou2.jpg" class="carrossel-item">  
+        <img src="imagens/tlou1.jpg" class="carrossel-item">
+        <img src="imagens/diablo4.jpg" class="carrossel-item">
+        <img src="imagens/rdr2.jpg" class="carrossel-item">
+        <img src="imagens/cs2.jpg" class="carrossel-item">
+        <img src="imagens/r6.jpg" class="carrossel-item">
+        <img src="imagens/valorant.jpg" class="carrossel-item">
+        <img src="imagens/leagueoflegends.jpg" class="carrossel-item">
+        <img src="imagens/brawhalla.jpg" class="carrossel-item">
+        <img src="imagens/repo.jpg" class="carrossel-item">
+        <img src="imagens/hearthstone.jpg" class="carrossel-item">
+        <img src="imagens/wow.jpg" class="carrossel-item">
+        <img src="imagens/dota2.jpg" class="carrossel-item">
+        <img src="imagens/codw.jpg" class="carrossel-item">
+        <img src="imagens/codbo2.jpg" class="carrossel-item">
+        <img src="imagens/bf1.jpg" class="carrossel-item">
+        <img src="imagens/crashbandicoot.jpg" class="carrossel-item">
+        <img src="imagens/tlou2.jpg" class="carrossel-item">  
+        <img src="imagens/tlou1.jpg" class="carrossel-item">
+        <img src="imagens/diablo4.jpg" class="carrossel-item">
+        <img src="imagens/rdr2.jpg" class="carrossel-item">
+        <img src="imagens/cs2.jpg" class="carrossel-item">
+        <img src="imagens/r6.jpg" class="carrossel-item">
+        <img src="imagens/valorant.jpg" class="carrossel-item">
+        <img src="imagens/leagueoflegends.jpg" class="carrossel-item">
+        <img src="imagens/brawhalla.jpg" class="carrossel-item">
+        <img src="imagens/repo.jpg" class="carrossel-item">
+        <img src="imagens/hearthstone.jpg" class="carrossel-item">
+        <img src="imagens/wow.jpg" class="carrossel-item">
+        <img src="imagens/dota2.jpg" class="carrossel-item">
+        <img src="imagens/codw.jpg" class="carrossel-item">
+        <img src="imagens/codbo2.jpg" class="carrossel-item">
+        <img src="imagens/bf1.jpg" class="carrossel-item">
+        <img src="imagens/crashbandicoot.jpg" class="carrossel-item">
+        <img src="imagens/tlou2.jpg" class="carrossel-item">  
+        <img src="imagens/tlou1.jpg" class="carrossel-item">
+        <img src="imagens/diablo4.jpg" class="carrossel-item">
+        <img src="imagens/rdr2.jpg" class="carrossel-item">
+        <img src="imagens/cs2.jpg" class="carrossel-item">
+        <img src="imagens/r6.jpg" class="carrossel-item">
+        <img src="imagens/valorant.jpg" class="carrossel-item">
+        <img src="imagens/leagueoflegends.jpg" class="carrossel-item">
+        <img src="imagens/brawhalla.jpg" class="carrossel-item">
+        <img src="imagens/repo.jpg" class="carrossel-item">
+        <img src="imagens/hearthstone.jpg" class="carrossel-item">
+        <img src="imagens/wow.jpg" class="carrossel-item">
+        <img src="imagens/dota2.jpg" class="carrossel-item">
+        <img src="imagens/codw.jpg" class="carrossel-item">
+        <img src="imagens/codbo2.jpg" class="carrossel-item">
+        <img src="imagens/bf1.jpg" class="carrossel-item">
+        <img src="imagens/crashbandicoot.jpg" class="carrossel-item">
+        <img src="imagens/tlou2.jpg" class="carrossel-item">  
+        <img src="imagens/tlou1.jpg" class="carrossel-item">
+        <img src="imagens/diablo4.jpg" class="carrossel-item">
+        <img src="imagens/rdr2.jpg" class="carrossel-item">
+        <img src="imagens/cs2.jpg" class="carrossel-item">
+        <img src="imagens/r6.jpg" class="carrossel-item">
+        <img src="imagens/valorant.jpg" class="carrossel-item">
+        <img src="imagens/leagueoflegends.jpg" class="carrossel-item">
+        <img src="imagens/brawhalla.jpg" class="carrossel-item">
+        <img src="imagens/repo.jpg" class="carrossel-item">
+        <img src="imagens/hearthstone.jpg" class="carrossel-item">
+        <img src="imagens/wow.jpg" class="carrossel-item">
+        <img src="imagens/dota2.jpg" class="carrossel-item">
+        <img src="imagens/codw.jpg" class="carrossel-item">
+        <img src="imagens/codbo2.jpg" class="carrossel-item">
+        <img src="imagens/bf1.jpg" class="carrossel-item">
+        <img src="imagens/crashbandicoot.jpg" class="carrossel-item">
+        <img src="imagens/tlou2.jpg" class="carrossel-item">  
+        <img src="imagens/tlou1.jpg" class="carrossel-item">
+        <img src="imagens/diablo4.jpg" class="carrossel-item">
+        <img src="imagens/rdr2.jpg" class="carrossel-item">
+        <img src="imagens/cs2.jpg" class="carrossel-item">
+        <img src="imagens/r6.jpg" class="carrossel-item">
+        <img src="imagens/valorant.jpg" class="carrossel-item">
+        <img src="imagens/leagueoflegends.jpg" class="carrossel-item">
+        <img src="imagens/brawhalla.jpg" class="carrossel-item">
+        <img src="imagens/repo.jpg" class="carrossel-item">
+        <img src="imagens/hearthstone.jpg" class="carrossel-item">
+        <img src="imagens/wow.jpg" class="carrossel-item">
+        <img src="imagens/dota2.jpg" class="carrossel-item">
+        <img src="imagens/codw.jpg" class="carrossel-item">
+        <img src="imagens/codbo2.jpg" class="carrossel-item">
+        <img src="imagens/bf1.jpg" class="carrossel-item">
+        <img src="imagens/crashbandicoot.jpg" class="carrossel-item">
+        <img src="imagens/tlou2.jpg" class="carrossel-item">  
+        <img src="imagens/tlou1.jpg" class="carrossel-item">
+        <img src="imagens/diablo4.jpg" class="carrossel-item">
+        <img src="imagens/rdr2.jpg" class="carrossel-item">
+        <img src="imagens/cs2.jpg" class="carrossel-item">
+        <img src="imagens/r6.jpg" class="carrossel-item">
+        <img src="imagens/valorant.jpg" class="carrossel-item">
+        <img src="imagens/leagueoflegends.jpg" class="carrossel-item">
+        <img src="imagens/brawhalla.jpg" class="carrossel-item">
+        <img src="imagens/repo.jpg" class="carrossel-item">
+        <img src="imagens/hearthstone.jpg" class="carrossel-item">
+        <img src="imagens/wow.jpg" class="carrossel-item">
+        <img src="imagens/dota2.jpg" class="carrossel-item">
+        <img src="imagens/codw.jpg" class="carrossel-item">
+        <img src="imagens/codbo2.jpg" class="carrossel-item">
+        <img src="imagens/bf1.jpg" class="carrossel-item">
+        <img src="imagens/crashbandicoot.jpg" class="carrossel-item">
+        <img src="imagens/tlou2.jpg" class="carrossel-item">  
+        <img src="imagens/tlou1.jpg" class="carrossel-item">
+        <img src="imagens/diablo4.jpg" class="carrossel-item">
+        <img src="imagens/rdr2.jpg" class="carrossel-item">
+        <img src="imagens/cs2.jpg" class="carrossel-item">
+        <img src="imagens/r6.jpg" class="carrossel-item">
+        <img src="imagens/valorant.jpg" class="carrossel-item">
+        <img src="imagens/leagueoflegends.jpg" class="carrossel-item">
+        <img src="imagens/brawhalla.jpg" class="carrossel-item">
+        <img src="imagens/repo.jpg" class="carrossel-item">
+        <img src="imagens/hearthstone.jpg" class="carrossel-item">
+        <img src="imagens/wow.jpg" class="carrossel-item">
+        <img src="imagens/dota2.jpg" class="carrossel-item">
+        <img src="imagens/codw.jpg" class="carrossel-item">
+        <img src="imagens/codbo2.jpg" class="carrossel-item">
+        <img src="imagens/bf1.jpg" class="carrossel-item">
+        <img src="imagens/crashbandicoot.jpg" class="carrossel-item">
+        <img src="imagens/tlou2.jpg" class="carrossel-item">  
+        <img src="imagens/tlou1.jpg" class="carrossel-item">
+        <img src="imagens/diablo4.jpg" class="carrossel-item">
+        <img src="imagens/rdr2.jpg" class="carrossel-item">
+        <img src="imagens/cs2.jpg" class="carrossel-item">
+        <img src="imagens/r6.jpg" class="carrossel-item">
+        <img src="imagens/valorant.jpg" class="carrossel-item">
+        <img src="imagens/leagueoflegends.jpg" class="carrossel-item">
+        <img src="imagens/brawhalla.jpg" class="carrossel-item">
+        <img src="imagens/repo.jpg" class="carrossel-item">
+        <img src="imagens/hearthstone.jpg" class="carrossel-item">
+        <img src="imagens/wow.jpg" class="carrossel-item">
+        <img src="imagens/dota2.jpg" class="carrossel-item">
+        <img src="imagens/codw.jpg" class="carrossel-item">
+        <img src="imagens/codbo2.jpg" class="carrossel-item">
+        <img src="imagens/bf1.jpg" class="carrossel-item">
+        <img src="imagens/crashbandicoot.jpg" class="carrossel-item">
+      </div>
+      <button class="nav right" id="navRight">&#10095;</button>
+    </div>
+
+    <section class="analises">
+      <h2>Análises populares</h2>
+      <div class="analise">
+        <img src="imagens/gowragnarok.jpg" class="capa">
+        <div class="detalhes">
+          <div class="titulo-jogo">
+            <h3>God of War - Ragnarok</h3>
+            <span class="ano">2019</span>
+          </div>
+          <div class="usuario">
+            <div class="avatar"></div>
+            <span class="nome">Fulano</span>
+          </div>
+          <div class="avaliacao">★★★★★</div>
+          <p class="comentario">Comentário sobre o jogo</p>
+          <div class="curtidas">
+            <span>🤍</span> 10k curtidas
+          </div>
+        </div>
+      </div>
+      <div class="analise">
+        <img src="imagens/gowragnarok.jpg" class="capa">
+        <div class="detalhes">
+          <div class="titulo-jogo">
+            <h3>God of War - Ragnarok</h3>
+            <span class="ano">2019</span>
+          </div>
+          <div class="usuario">
+            <div class="avatar"></div>
+            <span class="nome">Fulano</span>
+          </div>
+          <div class="avaliacao">★★★★★</div>
+          <p class="comentario">Comentário sobre o jogo</p>
+          <div class="curtidas">
+            <span>🤍</span> 10k curtidas
+          </div>
+        </div>
+      </div>
+      <div class="analise">
+        <img src="imagens/gowragnarok.jpg" class="capa">
+        <div class="detalhes">
+          <div class="titulo-jogo">
+            <h3>God of War - Ragnarok</h3>
+            <span class="ano">2019</span>
+          </div>
+          <div class="usuario">
+            <div class="avatar"></div>
+            <span class="nome">Fulano</span>
+          </div>
+          <div class="avaliacao">★★★★★</div>
+          <p class="comentario">Comentário sobre o jogo</p>
+          <div class="curtidas">
+            <span>🤍</span> 10k curtidas
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Sobre</h3>
+        <p><a href="#">Sobre o GameVault</a></p>
+        <p><a href="#">Dúvidas e perguntas</a></p>
+        <p><a href="#">Sugestões</a></p>
+        <p><a href="#">Nos ajude</a></p>
+      </div>
+      <div class="footer-section">
+        <h3>Contatos</h3>
+        <p>portal@gamevault.com.br</p>
+        <p>+55 (47) 3026-2850</p>
+        <p>Rua dos Jogos, 777</p>
+        <p>Joinville - SC - Brazil</p>
+      </div>
+      <div class="footer-section">
+        <h3>Valores</h3>
+        <p><a href="#">Meio Ambiente</a></p>
+        <p><a href="#">Acessibilidade</a></p>
+        <p><a href="#">Segurança Online</a></p>
+        <p><a href="#">Diversidade, equidade e inclusão</a></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 GameVault Association SA. Todo o conteúdo, títulos de jogos, nomes comerciais e/ou designações comerciais, marcas comerciais, arte e imagens associadas são marcas registradas e/ou material sob direitos autorais dos seus respectivos proprietários. Todos os direitos reservados. <a href="mais-informacoes.html">Mais informações</a>.</p>
+    </div>
+  </footer>
+
+  <!-- Modal de Login -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Conecte-se</h2>
+      <label>Usuário</label><br />
+      <input type="text" id="loginUsuario" placeholder="Digite seu usuário"><br />
+      <span class="erro" id="erroLoginUsuario"></span>
+      <label>Senha</label><br />
+      <input type="password" id="loginSenha" placeholder="Digite sua senha"><br />
+      <span class="erro" id="erroLoginSenha"></span>
+      <a href="#" class="esqueci">Esqueceu a senha?</a><br />
+      <button id="btnLogin">Entrar</button>
+      <p class="registro">Não possui conta? <a href="#" id="trocarParaCadastro">Registre-se</a></p>
+    </div>
+  </div>
+  <!-- Modal de Cadastro -->
+  <div id="cadastroModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Junte-se ao Gamevault</h2>
+      <label>Email</label><br />
+      <input type="email" id="cadastroEmail" placeholder="Digite seu e-mail"><br />
+      <span class="erro" id="erroCadastroEmail"></span>
+      <label>Usuário</label><br />
+      <input type="text" id="cadastroUsuario" placeholder="Escolha um nome de usuário"><br />
+      <span class="erro" id="erroCadastroUsuario"></span>
+      <label>Senha</label><br />
+      <input type="password" id="cadastroSenha" placeholder="Crie uma senha"><br />
+      <span class="erro" id="erroCadastroSenha"></span>
+      <label>Confirmar senha</label><br />
+      <input type="password" id="cadastroConfirmarSenha" placeholder="Confirme a senha"><br />
+      <span class="erro" id="erroCadastroConfirmarSenha"></span>
+      <button id="btnCadastro">Cadastrar</button>
+      <p class="registro">Já possui conta? <a href="#" id="trocarParaLogin">Conecte-se</a></p>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
