@@ -10,7 +10,6 @@ O GameVault é uma plataforma web de avaliação e recomendação de jogos digit
 A proposta do sistema é centralizar informações e opiniões da comunidade, facilitando a descoberta de novos jogos.
 
 🎯 Objetivo
-
 Desenvolver uma aplicação web completa utilizando:
 
 Node.js + Express (backend)
@@ -20,23 +19,29 @@ EJS + HTML + CSS + JS (frontend)
 Aplicando boas práticas de arquitetura, organização de código e integração entre camadas.
 
 🚀 Funcionalidades
+
 🔐 Usuários
 Cadastro e login
 Edição de perfil
 Exclusão de conta
+
 🎮 Jogos
 Listagem de jogos
 Página de detalhes (capa, descrição, avaliação)
 CRUD de jogos (admin)
+
 ⭐ Avaliações
 Avaliação por estrelas (1 a 5)
 Cálculo de média
+
 💬 Comentários
 Comentários por jogo
 Listagem dinâmica
+
 ❤️ Favoritos
 Adicionar/remover favoritos
 Listagem personalizada
+
 📑 Requisitos Funcionais
 <details> <summary>Ver requisitos</summary>
 RF01 – Cadastro de usuário
@@ -55,6 +60,7 @@ RF13 – Comentar jogos
 RF14 – Listar comentários
 RF15 – Favoritar jogos
 RF16 – Remover favoritos
+
 </details>
 ⚙️ Requisitos Não Funcionais
 RNF01 – Aplicação web responsiva
@@ -62,40 +68,43 @@ RNF02 – Tempo de resposta < 2s
 RNF03 – Validação de dados no backend
 RNF04 – Segurança básica de autenticação
 RNF05 – Compatível com navegadores modernos
+
 🛠️ Tecnologias
 Tecnologia	Função
 Node.js + Express	Backend
 MySQL	Banco de dados
 EJS	Renderização dinâmica
 HTML/CSS/JS	Interface
-🏗️ Arquitetura (Modelo C4)
-🔹 Nível 1 – Contexto
 
+🏗️ Arquitetura (Modelo C4)
+
+  🔹 Nível 1 – Contexto
 Usuário acessa o sistema via navegador → GameVault → Banco de Dados
 
 🔹 Nível 2 – Contêineres
 Frontend → Interface (EJS, HTML, CSS, JS)
 Backend → Node.js + Express
 Database → MySQL
+
 🔹 Nível 3 – Componentes
 
 Backend:
-
 Routes
 Controllers
 Models
 
 Frontend:
-
 Views (EJS)
 Scripts JS
 CSS
+
 🔹 Nível 4 – Código
 router.get('/jogo/:id', (req, res) => {
   const jogo = buscarJogo(req.params.id);
   res.render('detalhes', { jogo });
 });
-📁 Estrutura do Projeto
+
+Estrutura do Projeto:
 GameVault/
 │
 ├── public/
@@ -116,43 +125,40 @@ GameVault/
 │
 ├── app.js
 └── package.json
+
 👥 Organização da Equipe
-
 👨‍💻 Backend
-
 API
 Banco de dados
 Regras de negócio
 
 🎨 Frontend
-
 Interface
 Layout
 Responsividade
 
 🤝 Ambos
-
 Testes
 Integração
 Documentação
+
 🔧 Melhorias Futuras
-🔐 Autenticação JWT
-🎯 Sistema de recomendação
-🖼 Upload de imagens
-📊 Dashboard admin
+Autenticação JWT
+Sistema de recomendação
+Upload de imagens
+Dashboard admin
+
 📎 Como Executar
 npm install
 npm start
 
 Acesse:
-
 http://localhost:3000
-📌 Status do Projeto
 
+📌 Status do Projeto
 🚧 Em desenvolvimento
 
 📄 Licença
-
 Projeto acadêmico — uso educacional.
 
 DIAGRAMA C4
