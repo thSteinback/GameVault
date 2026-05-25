@@ -4,6 +4,8 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const bcrypt = require('bcrypt');
+
 
 const app = express();
 const port = 3000;
@@ -34,20 +36,24 @@ app.post('/cadastrar', (req, res) => {
   db.query(
     'SELECT 1 FROM usuarios WHERE USU_NOME = ? OR USU_EMAIL = ?',
     [nome, email],
-    (err, rows) => {
-      if (err)  return res.status(500).json({ success:false, message:'Erro no servidor' });
-      if (rows.length) return res.json({ success:false, message:'Nome ou e-mail já existe' });
+    async (err, rows) => {
+      if (err)  return res.status(500).json({ success: false, message: 'Falha de conexão com o servidor!' });
+      if (rows.length) return res.json({ success: false, message: 'Nome ou e-mail já existe' });
 
-      db.query(
-        `INSERT INTO usuarios
-         (USU_NOME, USU_EMAIL, USU_SENHA, USU_DATA_CRIACAO)
-         VALUES (?,?,?,CURRENT_DATE)`,
-        [nome, email, senha],
-        err2 => {
-          if (err2) return res.status(500).json({ success:false, message:'Erro ao cadastrar' });
-          res.json({ success:true, message:'Usuário cadastrado com sucesso' });
-        }
-      );
+      try {
+        const senhaHash = await bcrypt.hash(senha, 10); // <-- hash aqui
+
+        db.query(
+          `INSERT INTO usuarios (USU_NOME, USU_EMAIL, USU_SENHA) VALUES (?, ?, ?)`,
+          [nome, email, senhaHash],
+          (err2) => {
+            if (err2) return res.status(500).json({ success: false, message: 'Erro ao cadastrar' });
+            res.json({ success: true, message: 'Usuário cadastrado com sucesso' });
+          }
+        );
+      } catch (e) {
+        res.status(500).json({ success: false, message: 'Erro ao processar senha' });
+      }
     }
   );
 });
@@ -57,34 +63,32 @@ app.post('/cadastrar', (req, res) => {
 app.post('/login', (req, res) => {
   const { nome, senha } = req.body;
   if (!nome || !senha)
-    return res.status(400).json({ success:false, message:'Preencha todos os campos' });
+    return res.status(400).json({ success: false, message: 'Preencha todos os campos' });
 
-  /* função para finalizar a resposta */
-  const finalizar = (registro) => {
-    if (!registro || registro.senhaDB !== senha)
-      return res.json({ success:false, message:'Credenciais Inválidas' });
+  const verificar = async (registro, isAdmin) => {
+    if (!registro) return res.json({ success: false, message: 'Credenciais Inválidas' });
 
-    return res.json({ success:true, isAdmin: registro.tipo === 'ADMIN' });
+    const senhaOk = await bcrypt.compare(senha, registro.senhaDB); // <-- compare aqui
+    if (!senhaOk) return res.json({ success: false, message: 'Credenciais Inválidas' });
+
+    return res.json({ success: true, isAdmin });
   };
 
-  // 1) tenta na tabela USUARIOS
   db.query(
-    'SELECT USU_SENHA AS senhaDB, "USER" AS tipo \
-       FROM usuarios WHERE USU_NOME = ? OR USU_EMAIL = ?',
+    'SELECT USU_SENHA AS senhaDB FROM usuarios WHERE USU_NOME = ? OR USU_EMAIL = ?',
     [nome, nome],
     (err, rUser) => {
-      if (err) return res.status(500).json({ success:false, message:'Erro no servidor' });
-      if (rUser.length) return finalizar(rUser[0]);
+      if (err) return res.status(500).json({ success: false, message: 'Erro no servidor' });
+      if (rUser.length) return verificar(rUser[0], false);
 
-      // 2) tenta na tabela ADMINISTRADORES
       db.query(
-        'SELECT ADM_SENHA AS senhaDB, "ADMIN" AS tipo \
-           FROM administradores WHERE ADM_NOME = ? OR ADM_EMAIL = ?',
+        'SELECT ADM_SENHA AS senhaDB FROM administradores WHERE ADM_NOME = ? OR ADM_EMAIL = ?',
         [nome, nome],
         (err2, rAdm) => {
-          if (err2) return res.status(500).json({ success:false, message:'Erro no servidor' });
-          finalizar(rAdm[0]);   // se não achar → registro = undefined ⇒ credenciais inválidas
-        });
+          if (err2) return res.status(500).json({ success: false, message: 'Erro no servidor' });
+          verificar(rAdm[0], true);
+        }
+      );
     }
   );
 });

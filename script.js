@@ -169,7 +169,6 @@ if (btnCadastro) {
     const erroConfirmar = document.getElementById("erroCadastroConfirmarSenha");
 
     let erro = false;
-
     if (!email.value.trim()) {
       exibirErro(email, "E-mail obrigatório", erroEmail);
       erro = true;
@@ -213,6 +212,7 @@ if (btnCadastro) {
       });
 
       const data = await resp.json();
+      alert("data: " + JSON.stringify(data));
       if (data.success) {
         alert("Cadastro realizado com sucesso!");
         document.getElementById("cadastroModal").style.display = "none";
