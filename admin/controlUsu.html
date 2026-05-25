@@ -1,27 +1,382 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
+  <script src="js/guard.js"></script>
   <meta charset="UTF-8">
-  <title>Gerenciamento de Jogos</title>
-      <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GameVault — Controle de Usuários</title>
+  <link rel="stylesheet" href="../style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+  <style>
+    nav.menu ul { list-style: none; display: flex; gap: 18px; margin: 0; padding: 0; }
+    nav.menu ul li a {
+      color: #ccc; text-decoration: none;
+      font-family: 'Jersey 10', sans-serif; font-size: 17px;
+      padding: 6px 16px; border-radius: 30px; border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    nav.menu ul li a:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+    nav.menu ul li a.active { background: #fff; color: #301F8F; border-color: #fff; }
+
+    .admin-wrapper { max-width: 1100px; margin: 40px auto 80px; padding: 0 30px; }
+    .page-title { font-size: 30px; margin: 0 0 30px; color: #fff; }
+
+    /* Filtros rápidos */
+    .filter-pills {
+      display: flex; gap: 10px; margin-bottom: 22px; flex-wrap: wrap;
+    }
+    .pill {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #ccc; font-family: 'Jersey 10', sans-serif; font-size: 16px;
+      padding: 6px 18px; border-radius: 30px; cursor: pointer; transition: all 0.2s;
+    }
+    .pill:hover { background: rgba(255,255,255,0.14); color: #fff; }
+    .pill.active { background: #fff; color: #301F8F; border-color: #fff; }
+
+    /* Tabela */
+    .panel {
+      background: linear-gradient(135deg, rgba(48,31,143,0.4), rgba(0,0,0,0.5));
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 18px; overflow: hidden;
+    }
+    .panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 22px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .panel-header h3 { margin: 0; font-size: 18px; }
+
+    .search-bar input {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 30px; color: #fff;
+      font-family: 'Jersey 10', sans-serif; font-size: 15px;
+      padding: 6px 18px; outline: none; width: 200px;
+      transition: border-color 0.2s;
+    }
+    .search-bar input:focus { border-color: #8C8CFF; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    thead th {
+      background: rgba(0,0,0,0.3); padding: 10px 16px;
+      text-align: left; color: #999;
+      font-family: 'Jersey 10', sans-serif; font-size: 14px; font-weight: normal;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.2s; }
+    tbody tr:hover { background: rgba(255,255,255,0.04); }
+    tbody td { padding: 11px 16px; color: #ddd; vertical-align: middle; }
+
+    .badge {
+      display: inline-block; padding: 3px 12px;
+      border-radius: 20px; font-size: 13px;
+    }
+    .badge-admin  { background: rgba(255,200,0,0.15);   color: #ffc800; border: 1px solid #ffc80035; }
+    .badge-user   { background: rgba(100,200,255,0.15);  color: #64c8ff; border: 1px solid #64c8ff35; }
+
+    .mini-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      object-fit: cover; background: #444;
+      vertical-align: middle; margin-right: 8px;
+    }
+    .empty-state { text-align: center; color: #555; padding: 40px; font-size: 16px; }
+
+    .btn-acao {
+      background: transparent; border: 1px solid rgba(255,255,255,0.2);
+      color: #ccc; border-radius: 8px; padding: 5px 12px;
+      font-family: 'Jersey 10', sans-serif; font-size: 14px;
+      cursor: pointer; transition: all 0.2s; margin-right: 4px;
+    }
+    .btn-acao:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-acao.danger { border-color: rgba(255,80,80,0.4); color: #ff8080; }
+    .btn-acao.danger:hover { background: rgba(255,80,80,0.15); }
+
+    /* Modal detalhes */
+    .detail-modal {
+      display: none; position: fixed; z-index: 2000; inset: 0;
+      background: rgba(0,0,0,0.75);
+    }
+    .detail-modal.open { display: flex; align-items: center; justify-content: center; }
+    .detail-box {
+      background: linear-gradient(to bottom, #402f8f, #1c1c1c);
+      border-radius: 18px; padding: 34px 38px;
+      max-width: 400px; width: 92%; position: relative;
+      animation: fadeSlide 0.3s ease forwards;
+    }
+    .detail-box .close-btn {
+      position: absolute; top: 14px; right: 18px;
+      background: none; border: none; color: #fff;
+      font-size: 22px; cursor: pointer; line-height: 1;
+    }
+    .detail-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      object-fit: cover; background: #555;
+      display: block; margin: 0 auto 16px; border: 3px solid rgba(255,255,255,0.2);
+    }
+    .detail-name { text-align: center; font-size: 22px; margin: 0 0 4px; }
+    .detail-email { text-align: center; color: #aaa; font-size: 14px; margin: 0 0 18px; }
+    .detail-row {
+      display: flex; justify-content: space-between;
+      padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07);
+      font-size: 15px; color: #ccc;
+    }
+    .detail-row span:last-child { color: #fff; }
+    .detail-actions { margin-top: 22px; display: flex; gap: 12px; justify-content: center; }
+
+    /* Confirm */
+    .confirm-modal {
+      display: none; position: fixed; z-index: 3000; inset: 0;
+      background: rgba(0,0,0,0.75);
+    }
+    .confirm-modal.open { display: flex; align-items: center; justify-content: center; }
+    .confirm-box {
+      background: linear-gradient(to bottom, #402f8f, #1c1c1c);
+      border-radius: 16px; padding: 32px 38px;
+      text-align: center; max-width: 340px; width: 90%;
+      animation: fadeSlide 0.3s ease forwards;
+    }
+    .confirm-box p { font-size: 18px; margin: 0 0 24px; }
+
+    /* Toast */
+    #toast {
+      position: fixed; bottom: 28px; right: 28px;
+      background: #301F8F; color: #fff;
+      padding: 12px 24px; border-radius: 12px; font-size: 16px;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      opacity: 0; transform: translateY(16px);
+      transition: all 0.3s; pointer-events: none; z-index: 9999;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+
+    .count-badge {
+      background: rgba(255,255,255,0.1); color: #ccc;
+      font-size: 14px; padding: 2px 10px; border-radius: 20px; margin-left: 8px;
+    }
+  </style>
 </head>
 <body>
   <header>
-    <div style="display: flex; align-items: center;">
-        <a href="/admin/jogosAdm.html">
-          <img src="imagens/logoGV.png" alt="Logo GameVault" class="logo">
-        </a>
-        <h1>GameVault</h1>
+    <div style="display:flex;align-items:center;">
+      <a href="../index.html">
+        <img src="../imagens/logoGV.png" alt="Logo GameVault" class="logo">
+      </a>
+      <h1>GameVault</h1>
     </div>
-
     <nav class="menu">
       <ul>
-        <li><a href="/admin/jogos.html" class="active">Controle de Jogos</a></li>
-        <li><a href="/admin/usuarios.html">Controle de Usuários</a></li>
-        <li><a href="/admin/dashboard.html">Painel Administrativo</a></li>
-        <li><a href="#">Perfil</a></li>
+        <li><a href="jogosAdm.html">Controle de Jogos</a></li>
+        <li><a href="controlUsu.html" class="active">Controle de Usuários</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="../perfilp.html">Perfil</a></li>
+        <li><a href="#" id="btnSair">Sair</a></li>
       </ul>
     </nav>
+  </header>
+
+  <div class="admin-wrapper">
+    <h2 class="page-title">👥 Controle de Usuários</h2>
+
+    <!-- Filtros rápidos -->
+    <div class="filter-pills">
+      <button class="pill active" onclick="setFiltro('todos', this)">Todos</button>
+      <button class="pill" onclick="setFiltro('usuarios', this)">Usuários</button>
+      <button class="pill" onclick="setFiltro('admins', this)">Administradores</button>
+    </div>
+
+    <!-- Tabela -->
+    <div class="panel">
+      <div class="panel-header">
+        <h3>Registros <span class="count-badge" id="userCount">0</span></h3>
+        <div class="search-bar">
+          <input type="text" id="buscaUsuario" placeholder="🔍 Buscar..." oninput="filtrarTexto(this.value)">
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Usuário</th>
+            <th>E-mail</th>
+            <th>Perfil</th>
+            <th>Membro desde</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyUsuarios">
+          <tr><td colspan="5" class="empty-state">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
-</header>
+
+  <!-- Modal detalhes do usuário -->
+  <div id="detailModal" class="detail-modal">
+    <div class="detail-box">
+      <button class="close-btn" onclick="fecharDetail()">×</button>
+      <img id="detailAvatar" class="detail-avatar" src="" alt="">
+      <p class="detail-name" id="detailNome"></p>
+      <p class="detail-email" id="detailEmail"></p>
+      <div class="detail-row"><span>Perfil</span><span id="detailPerfil"></span></div>
+      <div class="detail-row"><span>Membro desde</span><span id="detailDesde"></span></div>
+      <div class="detail-actions">
+        <button class="btn-acao danger" id="detailExcluirBtn">🗑 Excluir</button>
+        <button class="btn-acao" onclick="fecharDetail()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal confirmação -->
+  <div id="confirmModal" class="confirm-modal">
+    <div class="confirm-box">
+      <p id="confirmTexto">Confirmar exclusão?</p>
+      <button class="btn-acao danger" onclick="confirmar()">🗑 Excluir</button>
+      &nbsp;
+      <button class="btn-acao" onclick="fecharConfirm()">Cancelar</button>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    const BASE = 'http://localhost:3000';
+    let pendingId = null;
+    let todosUsuarios = [];
+    let filtroAtivo = 'todos';
+
+    /* ── Proteção ── */
+    if (!localStorage.getItem('usuarioLogado') || localStorage.getItem('isAdmin') !== 'true') {
+      alert('Acesso restrito!');
+      window.location.href = '../index.html';
+    }
+
+    document.getElementById('btnSair').onclick = (e) => {
+      e.preventDefault();
+      localStorage.removeItem('usuarioLogado');
+      localStorage.removeItem('isAdmin');
+      window.location.href = '../index.html';
+    };
+
+    /* ── Toast ── */
+    function toast(msg, dur = 2800) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), dur);
+    }
+
+    /* ── Formatar data ── */
+    function fmtData(d) {
+      if (!d) return '—';
+      return new Date(d).toLocaleDateString('pt-BR');
+    }
+
+    /* ── Filtro por tipo ── */
+    function setFiltro(tipo, btn) {
+      filtroAtivo = tipo;
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      renderTabela();
+    }
+
+    /* ── Filtro por texto ── */
+    function filtrarTexto(termo) {
+      const rows = document.querySelectorAll('#tbodyUsuarios tr');
+      rows.forEach(tr => {
+        tr.style.display = tr.textContent.toLowerCase().includes(termo.toLowerCase()) ? '' : 'none';
+      });
+    }
+
+    /* ── Renderizar tabela ── */
+    function renderTabela() {
+      const tbody = document.getElementById('tbodyUsuarios');
+      let lista = todosUsuarios;
+      if (filtroAtivo === 'usuarios')  lista = lista.filter(u => !u.isAdmin);
+      if (filtroAtivo === 'admins')    lista = lista.filter(u =>  u.isAdmin);
+
+      document.getElementById('userCount').textContent = lista.length;
+
+      tbody.innerHTML = lista.length ? lista.map(u => `
+        <tr>
+          <td>
+            <img class="mini-avatar" src="${u.avatar ? BASE+'/uploads/'+u.avatar : '../imagens/oMimico.png'}" alt="">
+            ${u.nome}
+          </td>
+          <td style="color:#aaa;">${u.email}</td>
+          <td><span class="badge ${u.isAdmin ? 'badge-admin' : 'badge-user'}">${u.isAdmin ? 'Admin' : 'Usuário'}</span></td>
+          <td style="color:#aaa;">${fmtData(u.dataCriacao)}</td>
+          <td>
+            <button class="btn-acao" onclick="abrirDetail(${u.id})">👁 Ver</button>
+            ${!u.isAdmin ? `<button class="btn-acao danger" onclick="abrirConfirm(${u.id}, '${u.nome.replace(/'/g,"\\'")}')">🗑</button>` : ''}
+          </td>
+        </tr>`).join('')
+      : '<tr><td colspan="5" class="empty-state">Nenhum usuário encontrado.</td></tr>';
+    }
+
+    /* ── Carregar usuários ── */
+    async function carregarUsuarios() {
+      try {
+        todosUsuarios = await fetch(`${BASE}/admin/usuarios`).then(r => r.json());
+        renderTabela();
+      } catch {
+        document.getElementById('tbodyUsuarios').innerHTML =
+          '<tr><td colspan="5" class="empty-state">❌ Erro ao carregar usuários.</td></tr>';
+      }
+    }
+
+    /* ── Modal detalhes ── */
+    function abrirDetail(id) {
+      const u = todosUsuarios.find(x => x.id === id);
+      if (!u) return;
+      document.getElementById('detailAvatar').src = u.avatar ? `${BASE}/uploads/${u.avatar}` : '../imagens/oMimico.png';
+      document.getElementById('detailNome').textContent   = u.nome;
+      document.getElementById('detailEmail').textContent  = u.email;
+      document.getElementById('detailPerfil').textContent = u.isAdmin ? 'Administrador' : 'Usuário';
+      document.getElementById('detailDesde').textContent  = fmtData(u.dataCriacao);
+      const btnEx = document.getElementById('detailExcluirBtn');
+      if (u.isAdmin) {
+        btnEx.style.display = 'none';
+      } else {
+        btnEx.style.display = '';
+        btnEx.onclick = () => { fecharDetail(); abrirConfirm(u.id, u.nome); };
+      }
+      document.getElementById('detailModal').classList.add('open');
+    }
+    function fecharDetail() {
+      document.getElementById('detailModal').classList.remove('open');
+    }
+
+    /* ── Confirmar exclusão ── */
+    function abrirConfirm(id, nome) {
+      pendingId = id;
+      document.getElementById('confirmTexto').textContent = `Excluir o usuário "${nome}"?`;
+      document.getElementById('confirmModal').classList.add('open');
+    }
+    function fecharConfirm() {
+      pendingId = null;
+      document.getElementById('confirmModal').classList.remove('open');
+    }
+    async function confirmar() {
+      if (!pendingId) return;
+      fecharConfirm();
+      try {
+        const r = await fetch(`${BASE}/admin/usuarios/${pendingId}`, { method: 'DELETE' });
+        if (r.ok) { toast('✅ Usuário excluído!'); carregarUsuarios(); }
+        else toast('❌ Erro ao excluir.');
+      } catch { toast('❌ Erro de conexão!'); }
+    }
+
+    /* Fecha modais ao clicar fora */
+    ['confirmModal','detailModal'].forEach(id => {
+      document.getElementById(id).addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('open');
+          if (id === 'confirmModal') pendingId = null;
+        }
+      });
+    });
+
+    carregarUsuarios();
+  </script>
+</body>
+</html>

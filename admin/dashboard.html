@@ -1,29 +1,305 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
+  <script src="js/guard.js"></script>
   <meta charset="UTF-8">
-  <title>Gerenciamento de Jogos</title>
-        <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GameVault — Dashboard</title>
+  <link rel="stylesheet" href="../style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+  <style>
+    /* ── reset nav lista ── */
+    nav.menu ul { list-style: none; display: flex; gap: 18px; margin: 0; padding: 0; }
+    nav.menu ul li a {
+      color: #ccc;
+      text-decoration: none;
+      font-family: 'Jersey 10', sans-serif;
+      font-size: 17px;
+      padding: 6px 16px;
+      border-radius: 30px;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    nav.menu ul li a:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+    nav.menu ul li a.active {
+      background: #fff;
+      color: #301F8F;
+      border-color: #fff;
+    }
+
+    /* ── layout ── */
+    .admin-wrapper {
+      max-width: 1100px;
+      margin: 40px auto 80px;
+      padding: 0 30px;
+    }
+    .page-title {
+      font-size: 30px;
+      margin: 0 0 30px;
+      color: #fff;
+    }
+
+    /* ── Stats ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      margin-bottom: 36px;
+    }
+    .stat-card {
+      background: linear-gradient(135deg, rgba(48,31,143,0.65), rgba(0,0,0,0.55));
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 18px;
+      padding: 28px 20px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-4px); }
+    .stat-card .s-icon { font-size: 34px; display: block; margin-bottom: 10px; }
+    .stat-card .s-val  { font-size: 40px; display: block; line-height: 1; }
+    .stat-card .s-lbl  { font-size: 14px; color: #aaa; margin-top: 4px; display: block; }
+
+    /* ── Seções lado a lado ── */
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
+    @media (max-width: 700px) { .row-2 { grid-template-columns: 1fr; } }
+
+    /* ── Tabelas/Cards ── */
+    .panel {
+      background: linear-gradient(135deg, rgba(48,31,143,0.4), rgba(0,0,0,0.5));
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 22px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .panel-header h3 { margin: 0; font-size: 18px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    thead th {
+      background: rgba(0,0,0,0.3);
+      padding: 10px 16px;
+      text-align: left;
+      color: #999;
+      font-family: 'Jersey 10', sans-serif;
+      font-size: 14px;
+      font-weight: normal;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.2s; }
+    tbody tr:hover { background: rgba(255,255,255,0.04); }
+    tbody td { padding: 11px 16px; color: #ddd; vertical-align: middle; }
+
+    .badge {
+      display: inline-block; padding: 3px 12px;
+      border-radius: 20px; font-size: 13px;
+    }
+    .badge-admin   { background: rgba(255,200,0,0.15);   color: #ffc800; border: 1px solid #ffc80035; }
+    .badge-user    { background: rgba(100,200,255,0.15);  color: #64c8ff; border: 1px solid #64c8ff35; }
+    .badge-ativo   { background: rgba(0,200,120,0.15);   color: #00c878; border: 1px solid #00c87835; }
+
+    .mini-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      object-fit: cover; background: #444;
+      vertical-align: middle; margin-right: 8px;
+    }
+    .mini-img {
+      width: 36px; height: 50px; object-fit: cover;
+      border-radius: 6px; background: #333;
+      vertical-align: middle; margin-right: 10px;
+    }
+    .empty-state { text-align: center; color: #555; padding: 32px; font-size: 16px; }
+
+    /* ── Botão quick-link ── */
+    .quick-links { display: flex; gap: 14px; margin-bottom: 28px; flex-wrap: wrap; }
+    .ql-btn {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #ccc;
+      font-family: 'Jersey 10', sans-serif;
+      font-size: 17px;
+      padding: 10px 24px;
+      border-radius: 30px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .ql-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+    /* ── Relógio ── */
+    .page-subtitle { font-size: 14px; color: #888; margin: -20px 0 30px; }
+  </style>
 </head>
 <body>
   <header>
-    <div style="display: flex; align-items: center;">
-        <a href="/admin/jogosAdm.html">
-          <img src="imagens/logoGV.png" alt="Logo GameVault" class="logo">
-        </a>
-        <h1>GameVault</h1>
+    <div style="display:flex;align-items:center;">
+      <a href="../index.html">
+        <img src="../imagens/logoGV.png" alt="Logo GameVault" class="logo">
+      </a>
+      <h1>GameVault</h1>
     </div>
-
     <nav class="menu">
       <ul>
-        <li><a href="/admin/jogos.html" class="active">Controle de Jogos</a></li>
-        <li><a href="/admin/usuarios.html">Controle de Usuários</a></li>
-        <li><a href="/admin/dashboard.html">Painel Administrativo</a></li>
-        <li><a href="#">Perfil</a></li>
+        <li><a href="jogosAdm.html">Controle de Jogos</a></li>
+        <li><a href="controlUsu.html">Controle de Usuários</a></li>
+        <li><a href="dashboard.html" class="active">Dashboard</a></li>
+        <li><a href="../perfilp.html">Perfil</a></li>
+        <li><a href="#" id="btnSair">Sair</a></li>
       </ul>
     </nav>
+  </header>
+
+  <div class="admin-wrapper">
+    <h2 class="page-title">📊 Dashboard</h2>
+    <p class="page-subtitle" id="relogio"></p>
+
+    <!-- Cards de estatísticas -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="s-icon">🎮</span>
+        <span class="s-val" id="statJogos">—</span>
+        <span class="s-lbl">Jogos cadastrados</span>
+      </div>
+      <div class="stat-card">
+        <span class="s-icon">👤</span>
+        <span class="s-val" id="statUsuarios">—</span>
+        <span class="s-lbl">Usuários registrados</span>
+      </div>
+      <div class="stat-card">
+        <span class="s-icon">🛡️</span>
+        <span class="s-val" id="statAdmins">—</span>
+        <span class="s-lbl">Administradores</span>
+      </div>
+      <div class="stat-card">
+        <span class="s-icon">📅</span>
+        <span class="s-val" id="statNovosHoje">—</span>
+        <span class="s-lbl">Usuários este mês</span>
+      </div>
+    </div>
+
+    <!-- Quick links -->
+    <div class="quick-links">
+      <a class="ql-btn" href="jogosAdm.html">➕ Cadastrar jogo</a>
+      <a class="ql-btn" href="controlUsu.html">👥 Gerenciar usuários</a>
+      <a class="ql-btn" href="../index.html">🏠 Ver site</a>
+    </div>
+
+    <!-- Tabelas -->
+    <div class="row-2">
+      <!-- Últimos usuários -->
+      <div class="panel">
+        <div class="panel-header">
+          <h3>👤 Últimos usuários</h3>
+          <a href="controlUsu.html" style="color:#8C8CFF;font-size:14px;text-decoration:none;">Ver todos →</a>
+        </div>
+        <table>
+          <thead><tr><th>Usuário</th><th>Perfil</th><th>Desde</th></tr></thead>
+          <tbody id="tbodyUltimosUsuarios">
+            <tr><td colspan="3" class="empty-state">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Últimos jogos -->
+      <div class="panel">
+        <div class="panel-header">
+          <h3>🎮 Últimos jogos</h3>
+          <a href="jogosAdm.html" style="color:#8C8CFF;font-size:14px;text-decoration:none;">Ver todos →</a>
+        </div>
+        <table>
+          <thead><tr><th>Capa</th><th>Nome</th><th>Status</th></tr></thead>
+          <tbody id="tbodyUltimosJogos">
+            <tr><td colspan="3" class="empty-state">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
-</header>
 
+  <script>
+    const BASE = 'http://localhost:3000';
 
+    /* ── Proteção de rota ── */
+    const usuario = localStorage.getItem('usuarioLogado');
+    const isAdmin = localStorage.getItem('isAdmin');
+    if (!usuario || isAdmin !== 'true') {
+      alert('Acesso restrito a administradores!');
+      window.location.href = '../index.html';
+    }
+
+    document.getElementById('btnSair').onclick = (e) => {
+      e.preventDefault();
+      localStorage.removeItem('usuarioLogado');
+      localStorage.removeItem('isAdmin');
+      window.location.href = '../index.html';
+    };
+
+    /* ── Relógio ── */
+    function tick() {
+      const now = new Date();
+      document.getElementById('relogio').textContent =
+        now.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }) +
+        ' · ' + now.toLocaleTimeString('pt-BR');
+    }
+    tick(); setInterval(tick, 1000);
+
+    /* ── Carregar dados ── */
+    function fmtData(d) {
+      if (!d) return '—';
+      return new Date(d).toLocaleDateString('pt-BR');
+    }
+
+    async function carregar() {
+      try {
+        const [jogos, users] = await Promise.all([
+          fetch(`${BASE}/admin/jogos`).then(r => r.json()),
+          fetch(`${BASE}/admin/usuarios`).then(r => r.json())
+        ]);
+
+        document.getElementById('statJogos').textContent    = jogos.length;
+        document.getElementById('statUsuarios').textContent = users.filter(u => !u.isAdmin).length;
+        document.getElementById('statAdmins').textContent   = users.filter(u => u.isAdmin).length;
+
+        const mesAtual = new Date().getMonth();
+        const novosEsseMes = users.filter(u => {
+          if (!u.dataCriacao) return false;
+          return new Date(u.dataCriacao).getMonth() === mesAtual;
+        }).length;
+        document.getElementById('statNovosHoje').textContent = novosEsseMes;
+
+        /* Últimos usuários */
+        const tbU = document.getElementById('tbodyUltimosUsuarios');
+        const ultUsers = [...users].reverse().slice(0, 6);
+        tbU.innerHTML = ultUsers.length ? ultUsers.map(u => `
+          <tr>
+            <td>
+              <img class="mini-avatar" src="${u.avatar ? BASE+'/uploads/'+u.avatar : '../imagens/oMimico.png'}" alt="">
+              ${u.nome}
+            </td>
+            <td><span class="badge ${u.isAdmin ? 'badge-admin' : 'badge-user'}">${u.isAdmin ? 'Admin' : 'Usuário'}</span></td>
+            <td>${fmtData(u.dataCriacao)}</td>
+          </tr>`).join('') : '<tr><td colspan="3" class="empty-state">Nenhum usuário.</td></tr>';
+
+        /* Últimos jogos */
+        const tbJ = document.getElementById('tbodyUltimosJogos');
+        const ultJogos = [...jogos].reverse().slice(0, 6);
+        tbJ.innerHTML = ultJogos.length ? ultJogos.map(j => `
+          <tr>
+            <td><img class="mini-img" src="${j.JOG_IMG ? BASE+'/uploads/'+j.JOG_IMG : '../imagens/sem-capa.png'}" alt=""></td>
+            <td>${j.JOG_NOME}</td>
+            <td><span class="badge badge-ativo">Ativo</span></td>
+          </tr>`).join('') : '<tr><td colspan="3" class="empty-state">Nenhum jogo.</td></tr>';
+
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    carregar();
+  </script>
+</body>
+</html>

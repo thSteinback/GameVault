@@ -677,27 +677,5 @@ input.erro-input {
   border-color: #6c5ce7;
 }
 
-/*ADMIN*/
-
-<!-- HEADER – Painel Administrativo -->
-<header class="topbar">
-  <div class="container">
-    <a href="/" class="logo">
-      <img src="/imagens/logo.svg" alt="GameVault" height="40" />
-      <span>GameVault</span>
-    </a>
-
-    <nav class="menu">
-      <ul>
-        <li><a href="/admin/jogos.html">Controle de Jogos</a></li>
-        <li><a href="/admin/usuarios.html">Controle de Usuários</a></li>
-        <li><a href="/admin/dashboard.html" class="active">Painel Administrativo</a></li>
-        <li><a href="/perfilp.html">Perfil</a></li>
-      </ul>
-    </nav>
-  </div>
-</header>
-
-
-/*DESCJOGO*/
+/* DESCJOGO */
 

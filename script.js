@@ -79,12 +79,22 @@ document.addEventListener("DOMContentLoaded", function () {
     spanUser.style.marginRight = "12px";
     spanUser.style.color = "#fff";
     nav.insertBefore(spanUser, nav.firstChild);
+    console.log("Usuário logado:", usuarioLogado);
+    const isAdmin = localStorage.getItem("isAdmin");
+    if (isAdmin === "true") {
+      const btnAdmin = document.createElement("a");
+      btnAdmin.textContent = "Painel Admin";
+      btnAdmin.href = "admin/dashboard.html";
+      btnAdmin.style.cssText = "margin-right:12px;color:#FFD700;font-weight:bold;";
+      nav.appendChild(btnAdmin);
+    }
     // Botão de sair
     const btnSair = document.createElement("button");
     btnSair.textContent = "Sair";
     btnSair.style.background = "#fff";
     btnSair.onclick = () => {
       localStorage.removeItem("usuarioLogado");
+      localStorage.removeItem("isAdmin");
       location.reload();
     };
     nav.appendChild(btnSair);
@@ -138,10 +148,14 @@ if (btnLogin) {
 
       const data = await resp.json();
       if (data.success) {
-        alert("Login realizado com sucesso!");
-        document.getElementById("loginModal").style.display = "none";
         localStorage.setItem("usuarioLogado", usuario.value);
-        location.reload();
+        localStorage.setItem("isAdmin", data.isAdmin ? "true" : "false");
+        document.getElementById("loginModal").style.display = "none";
+        if (data.isAdmin) {
+          window.location.href = "admin.html";
+        } else {
+          location.reload();
+        }
       } else {
         exibirErro(usuario, "Credenciais Inválidas", erroUsuario);
         exibirErro(senha, "Credenciais Inválidas", erroSenha);

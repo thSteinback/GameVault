@@ -202,6 +202,82 @@ app.get('/usuario-info', (req, res) => {
   );
 });
 
+/* ─────────────────────────────────────────
+   ROTAS ADMIN
+   ───────────────────────────────────────── */
+
+// Listar todos os jogos (admin)
+app.get('/admin/jogos', (req, res) => {
+  db.query(
+    'SELECT JOG_COD, JOG_NOME, JOG_DESC, JOG_IMG FROM jogos WHERE JOG_ATIVO = 1',
+    (err, rows) => {
+      if (err) return res.status(500).json({ erro: 'Falha ao listar jogos' });
+      res.json(rows);
+    }
+  );
+});
+
+// Cadastrar jogo (admin)
+app.post('/admin/jogos', upload.single('imagem'), (req, res) => {
+  const { nome, desc } = req.body;
+  const img = req.file ? req.file.filename : null;
+  if (!nome) return res.status(400).json({ erro: 'Nome obrigatório' });
+
+  db.query(
+    'INSERT INTO jogos (JOG_NOME, JOG_DESC, JOG_IMG, JOG_ATIVO) VALUES (?,?,?,1)',
+    [nome, desc || null, img],
+    (err) => {
+      if (err) return res.status(500).json({ erro: 'Falha ao cadastrar jogo' });
+      res.status(201).json({ msg: 'Jogo inserido com sucesso' });
+    }
+  );
+});
+
+// Excluir jogo (admin)
+app.delete('/admin/jogos/:id', (req, res) => {
+  const { id } = req.params;
+  db.query('SELECT JOG_IMG FROM jogos WHERE JOG_COD = ?', [id], (err, rows) => {
+    if (err) return res.status(500).json({ erro: 'Falha ao buscar jogo' });
+    if (rows.length && rows[0].JOG_IMG) {
+      const caminho = path.resolve(__dirname, 'uploads', rows[0].JOG_IMG);
+      fs.unlink(caminho, () => {});
+    }
+    db.query('DELETE FROM jogos WHERE JOG_COD = ?', [id], (err2) => {
+      if (err2) return res.status(500).json({ erro: 'Falha ao excluir jogo' });
+      res.json({ msg: 'Jogo removido' });
+    });
+  });
+});
+
+// Listar usuários (admin)
+app.get('/admin/usuarios', (req, res) => {
+  db.query(
+    `SELECT USU_COD AS id, USU_NOME AS nome, USU_EMAIL AS email,
+            USU_AVATAR AS avatar, USU_DATA_CRIACAO AS dataCriacao,
+            0 AS isAdmin
+     FROM usuarios
+     UNION ALL
+     SELECT ADM_COD AS id, ADM_NOME AS nome, ADM_EMAIL AS email,
+            NULL AS avatar, ADM_DATA_CRIACAO AS dataCriacao,
+            1 AS isAdmin
+     FROM administradores
+     ORDER BY dataCriacao DESC`,
+    (err, rows) => {
+      if (err) return res.status(500).json({ erro: 'Falha ao listar usuários' });
+      res.json(rows);
+    }
+  );
+});
+
+// Excluir usuário (admin)
+app.delete('/admin/usuarios/:id', (req, res) => {
+  const { id } = req.params;
+  db.query('DELETE FROM usuarios WHERE USU_COD = ?', [id], (err) => {
+    if (err) return res.status(500).json({ erro: 'Falha ao excluir usuário' });
+    res.json({ msg: 'Usuário removido' });
+  });
+});
+
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
 });
