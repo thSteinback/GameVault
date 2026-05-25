@@ -65,30 +65,22 @@ app.post('/login', (req, res) => {
   if (!nome || !senha)
     return res.status(400).json({ success: false, message: 'Preencha todos os campos' });
 
-  const verificar = async (registro, isAdmin) => {
-    if (!registro) return res.json({ success: false, message: 'Credenciais Inválidas' });
-
-    const senhaOk = await bcrypt.compare(senha, registro.senhaDB); // <-- compare aqui
-    if (!senhaOk) return res.json({ success: false, message: 'Credenciais Inválidas' });
-
-    return res.json({ success: true, isAdmin });
-  };
-
   db.query(
-    'SELECT USU_SENHA AS senhaDB FROM usuarios WHERE USU_NOME = ? OR USU_EMAIL = ?',
+    'SELECT USU_SENHA AS senhaDB, USU_TIPO FROM usuarios WHERE USU_NOME = ? OR USU_EMAIL = ?',
     [nome, nome],
-    (err, rUser) => {
+    async (err, rUser) => {
       if (err) return res.status(500).json({ success: false, message: 'Erro no servidor' });
-      if (rUser.length) return verificar(rUser[0], false);
 
-      db.query(
-        'SELECT ADM_SENHA AS senhaDB FROM administradores WHERE ADM_NOME = ? OR ADM_EMAIL = ?',
-        [nome, nome],
-        (err2, rAdm) => {
-          if (err2) return res.status(500).json({ success: false, message: 'Erro no servidor' });
-          verificar(rAdm[0], true);
-        }
-      );
+      if (rUser.length) {
+        const senhaOk = await bcrypt.compare(senha, rUser[0].senhaDB);
+        if (!senhaOk) return res.json({ success: false, message: 'Credenciais Inválidas' });
+
+        // Agora verifica o tipo direto na coluna
+        const isAdmin = rUser[0].USU_TIPO === 'admin';
+        return res.json({ success: true, isAdmin });
+      }
+
+      return res.json({ success: false, message: 'Credenciais Inválidas' });
     }
   );
 });
@@ -276,6 +268,18 @@ app.delete('/admin/usuarios/:id', (req, res) => {
     if (err) return res.status(500).json({ erro: 'Falha ao excluir usuário' });
     res.json({ msg: 'Usuário removido' });
   });
+});
+
+app.get('/verificar-admin', (req, res) => {
+  const nome = req.query.nome;
+  db.query(
+    'SELECT 1 FROM usuarios WHERE (USU_NOME = ? OR USU_EMAIL = ?) AND USU_TIPO = "admin"',
+    [nome, nome],
+    (err, rows) => {
+      if (err) return res.status(500).json({ isAdmin: false });
+      res.json({ isAdmin: rows.length > 0 });
+    }
+  );
 });
 
 app.listen(port, () => {
