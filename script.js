@@ -201,7 +201,7 @@ if (btnCadastro) {
     if (erro) return;
 
     try {
-      const resp = await fetch("http://localhost:3000/cadastro", {
+      const resp = await fetch("http://localhost:3000/cadastrar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
