@@ -1,59 +1,67 @@
-/*  ───────────────  CRUD de Jogos  ─────────────── */
-const pool   = require('../config/db');        // mysql2/promise
-const path   = require('path');
-const fs     = require('fs');
-const upload = require('../config/multer');    // upload de imagem
+const moderacao  = require('../moderacao');
+const Usuario    = require('../models/usuarioModel');
+const Comentario = require('../models/comentarioModel');
 
-/* ---------- LISTAR ---------- */
-exports.listJogos = async (req, res) => {
-  try {
-    const [rows] = await pool.execute(
-      'SELECT JOG_COD, JOG_NOME, JOG_DESC, JOG_IMG FROM jogos WHERE JOG_ATIVO = 1'
-    );
-    res.json(rows);
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ erro: 'Falha ao listar jogos' });
-  }
+exports.listarUsuarios = async (req, res) => {
+  try { const [rows] = await Usuario.listarTodosComAdmins(); res.json(rows); }
+  catch (e) { console.error(e); res.status(500).json({ erro: 'Falha ao listar usuários' }); }
 };
 
-/* ---------- CADASTRAR ---------- */
-exports.createJogo = [
-  upload.single('imagem'),                     // campo <input name="imagem">
-  async (req, res) => {
-    try {
-      const { nome, desc } = req.body;
-      const img            = req.file ? req.file.filename : null;
+exports.excluirUsuario = async (req, res) => {
+  try { await Usuario.excluir(req.params.id); res.json({ msg: 'Usuário removido' }); }
+  catch (e) { console.error(e); res.status(500).json({ erro: 'Falha ao excluir usuário' }); }
+};
 
-      await pool.execute(
-        'INSERT INTO jogos (JOG_NOME, JOG_DESC, JOG_IMG, JOG_ATIVO) VALUES (?,?,?,1)',
-        [nome, desc || null, img]
-      );
-      res.status(201).json({ msg: 'Jogo inserido com sucesso' });
-    } catch (e) {
-      console.error(e);
-      res.status(500).json({ erro: 'Falha ao cadastrar jogo' });
-    }
-  }
-];
-
-/* ---------- EXCLUIR ---------- */
-exports.deleteJogo = async (req, res) => {
+/* Agente moderador — varredura em lote */
+exports.moderar = async (req, res) => {
   try {
-    const { id } = req.params;
+    const [comentarios] = await Comentario.listarTodosComAutor();
 
-    // apaga imagem física (se houver)
-    const [[jogo]] = await pool.execute(
-      'SELECT JOG_IMG FROM jogos WHERE JOG_COD = ?', [id]
-    );
-    if (jogo?.JOG_IMG) {
-      fs.unlink(path.resolve(__dirname, '..', 'uploads', jogo.JOG_IMG), () => {});
+    const aRemover   = [];
+    const porUsuario = {};
+    const detalhes   = [];
+
+    for (const c of comentarios) {
+      const r = moderacao.analisar(c.COM_TEXTO || '');
+      if (!r.toxico) continue;
+      aRemover.push(c.COM_COD);
+      if (!porUsuario[c.USU_COD])
+        porUsuario[c.USU_COD] = { nome: c.USU_NOME, qtd: 0, termos: new Set(), grave: false };
+      porUsuario[c.USU_COD].qtd++;
+      porUsuario[c.USU_COD].grave = porUsuario[c.USU_COD].grave || r.grave;
+      r.termos.forEach(t => porUsuario[c.USU_COD].termos.add(t));
+      detalhes.push({ usuario: c.USU_NOME, grave: r.grave, termos: r.termos });
     }
 
-    await pool.execute('DELETE FROM jogos WHERE JOG_COD = ?', [id]);
-    res.json({ msg: 'Jogo removido' });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ erro: 'Falha ao excluir jogo' });
-  }
+    if (aRemover.length) await Comentario.excluirVarios(aRemover);
+
+    const banidos = [];
+    for (const usuCod of Object.keys(porUsuario)) {
+      const info = porUsuario[usuCod];
+      await Usuario.somarStrikes(usuCod, info.qtd);
+      const [permRows] = await Usuario.getPermissoes(usuCod);
+      const perm = permRows[0];
+      if (perm.PERM_STRIKES >= moderacao.LIMITE_STRIKES && perm.PERM_BANIDO !== 1) {
+        await Usuario.banir(usuCod);
+        await Usuario.registrarLog(usuCod, `Banimento automático do moderador (${perm.PERM_STRIKES} strikes)`);
+        banidos.push({ usuario: info.nome, strikes: perm.PERM_STRIKES });
+      }
+    }
+
+    res.json({
+      analisados: comentarios.length,
+      removidos: aRemover.length,
+      usuariosAfetados: Object.keys(porUsuario).length,
+      banidos, detalhes,
+      limiteStrikes: moderacao.LIMITE_STRIKES
+    });
+  } catch (e) { console.error(e); res.status(500).json({ erro: 'Falha na moderação' }); }
+};
+
+exports.desbanir = async (req, res) => {
+  try {
+    await Usuario.desbanir(req.params.id);
+    await Usuario.registrarLog(req.params.id, 'Desbanido manualmente pelo admin');
+    res.json({ msg: 'Usuário desbanido' });
+  } catch (e) { console.error(e); res.status(500).json({ erro: 'Falha ao desbanir' }); }
 };
