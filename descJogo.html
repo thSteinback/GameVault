@@ -48,6 +48,21 @@
           <h2 id="titulo-jogo">Título do Jogo</h2>
           <p id="descricao-jogo">Descrição será carregada aqui.</p>
         </section>
+
+        <section class="jogo-comentarios" style="margin-top:28px;">
+          <h3 style="margin-bottom:12px;">Comentários</h3>
+          <div id="comentar-box" style="margin-bottom:16px;">
+            <textarea id="comentario-texto" rows="3" placeholder="Escreva um comentário..."
+              style="width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #444;background:#1b1b22;color:#eee;resize:vertical;"></textarea>
+            <div style="margin-top:8px;display:flex;align-items:center;gap:12px;">
+              <button id="btn-enviar-comentario" style="padding:8px 18px;border:0;border-radius:8px;background:#8C8CFF;color:#13131a;font-weight:600;cursor:pointer;">Publicar</button>
+              <span id="comentario-aviso" style="color:#ff8c8c;font-size:13px;"></span>
+            </div>
+          </div>
+          <ul id="lista-comentarios" style="padding:0;margin:0;">
+            <li style="list-style:none;color:#aaa;">Carregando comentários...</li>
+          </ul>
+        </section>
       </main>
     </div>
   </div>
@@ -84,5 +99,90 @@
   </footer>
 
   <script src="script.js"></script>
+  <script>
+    /* ── Carrega o jogo pelo ?id= da URL ── */
+    (function () {
+      const API = 'http://localhost:3000';
+      const FALLBACK = 'imagens/logoGV.png';
+      const id = new URLSearchParams(location.search).get('id');
+      const titulo = document.getElementById('titulo-jogo');
+      if (!id) { if (titulo) titulo.textContent = 'Jogo não informado'; return; }
+
+      fetch(`${API}/jogos/${id}`)
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(j => {
+          const img = j.JOG_IMG ? `${API}/uploads/${j.JOG_IMG}` : FALLBACK;
+          const capa = document.getElementById('capa-jogo');
+          if (capa) { capa.src = img; capa.onerror = () => { capa.onerror = null; capa.src = FALLBACK; }; }
+          if (titulo) titulo.textContent = j.JOG_NOME || 'Sem título';
+          document.title = 'GameVault — ' + (j.JOG_NOME || '');
+          const desc = document.getElementById('descricao-jogo');
+          if (desc) desc.textContent = j.JOG_DESC || 'Sem descrição.';
+          const bg = document.getElementById('background-container');
+          if (bg) {
+            bg.style.backgroundImage = `url('${img}')`;
+            bg.style.backgroundSize = 'cover';
+            bg.style.backgroundPosition = 'center';
+          }
+        })
+        .catch(() => { if (titulo) titulo.textContent = 'Jogo não encontrado'; });
+    })();
+  </script>
+  <script>
+    /* ── Comentários: listar e publicar ── */
+    (function () {
+      const API = 'http://localhost:3000';
+      const id  = new URLSearchParams(location.search).get('id');
+      const lista = document.getElementById('lista-comentarios');
+      const txt   = document.getElementById('comentario-texto');
+      const btn   = document.getElementById('btn-enviar-comentario');
+      const aviso = document.getElementById('comentario-aviso');
+      if (!id || !lista) return;
+
+      const usuarioLogado = localStorage.getItem('usuarioLogado');
+      const box = document.getElementById('comentar-box');
+      if (!usuarioLogado && box) box.innerHTML = '<p style="color:#aaa;">Faça login para comentar.</p>';
+
+      const escapar = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; };
+      const fmt = d => { try { return new Date(d).toLocaleString('pt-BR'); } catch { return ''; } };
+
+      function carregar() {
+        fetch(`${API}/jogos/${id}/comentarios`)
+          .then(r => r.json())
+          .then(cs => {
+            if (!Array.isArray(cs) || !cs.length) {
+              lista.innerHTML = '<li style="list-style:none;color:#aaa;">Nenhum comentário ainda. Seja o primeiro!</li>';
+              return;
+            }
+            lista.innerHTML = cs.map(c => `
+              <li style="list-style:none;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08);">
+                <strong>${escapar(c.USU_NOME)}</strong>
+                <span style="color:#888;font-size:12px;"> · ${fmt(c.COM_DATA)}</span>
+                <p style="margin:4px 0 0;">${escapar(c.COM_TEXTO)}</p>
+              </li>`).join('');
+          })
+          .catch(() => { lista.innerHTML = '<li style="list-style:none;color:#aaa;">Erro ao carregar comentários.</li>'; });
+      }
+
+      if (btn) btn.addEventListener('click', () => {
+        const texto = (txt.value || '').trim();
+        aviso.textContent = '';
+        if (!texto) { aviso.textContent = 'Escreva algo antes de publicar.'; return; }
+        fetch(`${API}/jogos/${id}/comentarios`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome: usuarioLogado, texto })
+        })
+          .then(async r => {
+            const data = await r.json().catch(() => ({}));
+            if (r.ok) { txt.value = ''; carregar(); }
+            else { aviso.textContent = data.erro || 'Não foi possível publicar.'; }
+          })
+          .catch(() => { aviso.textContent = 'Erro de conexão.'; });
+      });
+
+      carregar();
+    })();
+  </script>
 </body>
 </html>

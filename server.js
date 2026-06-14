@@ -5,6 +5,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
+const moderacao = require('./moderacao');
 
 
 const app = express();
@@ -29,6 +30,9 @@ db.connect(err => {
   }
 });
 
+// Interface baseada em Promise (async/await) reutilizando a mesma conexão.
+const dbp = db.promise();
+
 /* ---------- CADASTRO (usuário comum) ---------- */
 app.post('/cadastrar', (req, res) => {
   const { nome, email, senha } = req.body;
@@ -46,8 +50,14 @@ app.post('/cadastrar', (req, res) => {
         db.query(
           `INSERT INTO usuarios (USU_NOME, USU_EMAIL, USU_SENHA) VALUES (?, ?, ?)`,
           [nome, email, senhaHash],
-          (err2) => {
+          (err2, result) => {
             if (err2) return res.status(500).json({ success: false, message: 'Erro ao cadastrar' });
+            // Cria a linha de permissões do usuário (banido=0, strikes=0, pode comentar)
+            db.query(
+              'INSERT IGNORE INTO permissoesusuarios (USU_COD, PERM_BANIDO, PERM_STRIKES, PERM_COMENTAR) VALUES (?,0,0,1)',
+              [result.insertId],
+              () => {}
+            );
             res.json({ success: true, message: 'Usuário cadastrado com sucesso' });
           }
         );
@@ -244,14 +254,19 @@ app.delete('/admin/jogos/:id', (req, res) => {
 // Listar usuários (admin)
 app.get('/admin/usuarios', (req, res) => {
   db.query(
-    `SELECT USU_COD AS id, USU_NOME AS nome, USU_EMAIL AS email,
-            USU_AVATAR AS avatar, USU_DATA_CRIACAO AS dataCriacao,
-            0 AS isAdmin
-     FROM usuarios
+    `SELECT u.USU_COD AS id, u.USU_NOME AS nome, u.USU_EMAIL AS email,
+            u.USU_AVATAR AS avatar, u.USU_DATA_CRIACAO AS dataCriacao,
+            0 AS isAdmin,
+            COALESCE(p.PERM_BANIDO, 0)  AS banido,
+            COALESCE(p.PERM_STRIKES, 0) AS strikes
+     FROM usuarios u
+     LEFT JOIN permissoesusuarios p ON p.USU_COD = u.USU_COD
      UNION ALL
      SELECT ADM_COD AS id, ADM_NOME AS nome, ADM_EMAIL AS email,
             NULL AS avatar, ADM_DATA_CRIACAO AS dataCriacao,
-            1 AS isAdmin
+            1 AS isAdmin,
+            0 AS banido,
+            0 AS strikes
      FROM administradores
      ORDER BY dataCriacao DESC`,
     (err, rows) => {
@@ -280,6 +295,202 @@ app.get('/verificar-admin', (req, res) => {
       res.json({ isAdmin: rows.length > 0 });
     }
   );
+});
+
+/* ─────────────────────────────────────────
+   ROTAS PÚBLICAS DE JOGOS (catálogo do usuário)
+   ───────────────────────────────────────── */
+
+// Listar todos os jogos ativos (visível para qualquer usuário)
+app.get('/jogos', (req, res) => {
+  db.query(
+    'SELECT JOG_COD, JOG_NOME, JOG_DESC, JOG_IMG FROM jogos WHERE JOG_ATIVO = 1 ORDER BY JOG_DATA_CADASTRO DESC',
+    (err, rows) => {
+      if (err) return res.status(500).json({ erro: 'Falha ao listar jogos' });
+      res.json(rows);
+    }
+  );
+});
+
+// Detalhe de um jogo específico
+app.get('/jogos/:id', (req, res) => {
+  db.query(
+    'SELECT JOG_COD, JOG_NOME, JOG_DESC, JOG_IMG FROM jogos WHERE JOG_COD = ? AND JOG_ATIVO = 1',
+    [req.params.id],
+    (err, rows) => {
+      if (err) return res.status(500).json({ erro: 'Falha ao buscar jogo' });
+      if (!rows.length) return res.status(404).json({ erro: 'Jogo não encontrado' });
+      res.json(rows[0]);
+    }
+  );
+});
+
+/* ─────────────────────────────────────────
+   COMENTÁRIOS
+   ───────────────────────────────────────── */
+
+// resolve o USU_COD a partir do nome (ou email) de usuário
+async function acharUsuarioPorNome(nome) {
+  const [rows] = await dbp.execute(
+    'SELECT USU_COD FROM usuarios WHERE USU_NOME = ? OR USU_EMAIL = ?',
+    [nome, nome]
+  );
+  return rows.length ? rows[0].USU_COD : null;
+}
+
+// Listar comentários de um jogo
+app.get('/jogos/:id/comentarios', async (req, res) => {
+  try {
+    const [rows] = await dbp.execute(
+      `SELECT c.COM_COD, c.COM_TEXTO, c.COM_DATA, u.USU_NOME, u.USU_AVATAR
+         FROM comentarios c
+         JOIN usuarios u ON u.USU_COD = c.USU_COD
+        WHERE c.JOG_COD = ?
+        ORDER BY c.COM_DATA DESC`,
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ erro: 'Falha ao listar comentários' });
+  }
+});
+
+// Criar comentário (bloqueia usuários banidos)
+app.post('/jogos/:id/comentarios', async (req, res) => {
+  const { nome, texto } = req.body;
+  if (!nome || !texto || !texto.trim())
+    return res.status(400).json({ erro: 'Informe o usuário e um texto não vazio' });
+
+  try {
+    const usuCod = await acharUsuarioPorNome(nome);
+    if (!usuCod) return res.status(401).json({ erro: 'Faça login para comentar' });
+
+    const [[perm]] = await dbp.execute(
+      'SELECT PERM_BANIDO, PERM_COMENTAR FROM permissoesusuarios WHERE USU_COD = ?',
+      [usuCod]
+    );
+    if (perm && (perm.PERM_BANIDO === 1 || perm.PERM_COMENTAR === 0))
+      return res.status(403).json({ erro: 'Você está impedido de comentar.' });
+
+    await dbp.execute(
+      'INSERT INTO comentarios (USU_COD, JOG_COD, COM_TEXTO) VALUES (?,?,?)',
+      [usuCod, req.params.id, texto.trim()]
+    );
+    res.status(201).json({ msg: 'Comentário publicado' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ erro: 'Falha ao publicar comentário' });
+  }
+});
+
+// Excluir um comentário específico (admin)
+app.delete('/comentarios/:id', async (req, res) => {
+  try {
+    await dbp.execute('DELETE FROM comentarios WHERE COM_COD = ?', [req.params.id]);
+    res.json({ msg: 'Comentário removido' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ erro: 'Falha ao remover comentário' });
+  }
+});
+
+/* ─────────────────────────────────────────
+   AGENTE MODERADOR — varredura em lote, sob demanda
+   Analisa todos os comentários, remove os tóxicos, acumula
+   strikes por autor e bane quem atingir o limite.
+   ───────────────────────────────────────── */
+app.post('/admin/moderar', async (req, res) => {
+  try {
+    const [comentarios] = await dbp.execute(
+      `SELECT c.COM_COD, c.USU_COD, c.COM_TEXTO, u.USU_NOME
+         FROM comentarios c
+         JOIN usuarios u ON u.USU_COD = c.USU_COD`
+    );
+
+    const aRemover = [];
+    const porUsuario = {}; // USU_COD -> { nome, qtd, termos:Set, grave }
+    const detalhes = [];
+
+    for (const c of comentarios) {
+      const r = moderacao.analisar(c.COM_TEXTO || '');
+      if (!r.toxico) continue;
+
+      aRemover.push(c.COM_COD);
+      if (!porUsuario[c.USU_COD])
+        porUsuario[c.USU_COD] = { nome: c.USU_NOME, qtd: 0, termos: new Set(), grave: false };
+      porUsuario[c.USU_COD].qtd++;
+      porUsuario[c.USU_COD].grave = porUsuario[c.USU_COD].grave || r.grave;
+      r.termos.forEach(t => porUsuario[c.USU_COD].termos.add(t));
+      detalhes.push({ usuario: c.USU_NOME, grave: r.grave, termos: r.termos });
+    }
+
+    // remove os comentários tóxicos de uma vez
+    if (aRemover.length) {
+      await dbp.query('DELETE FROM comentarios WHERE COM_COD IN (?)', [aRemover]);
+    }
+
+    // aplica strikes e decide banimentos
+    const banidos = [];
+    for (const usuCod of Object.keys(porUsuario)) {
+      const info = porUsuario[usuCod];
+
+      // garante a linha e soma os strikes detectados nesta varredura
+      await dbp.execute(
+        `INSERT INTO permissoesusuarios (USU_COD, PERM_BANIDO, PERM_STRIKES, PERM_COMENTAR)
+         VALUES (?, 0, ?, 1)
+         ON DUPLICATE KEY UPDATE PERM_STRIKES = PERM_STRIKES + VALUES(PERM_STRIKES)`,
+        [usuCod, info.qtd]
+      );
+
+      const [[perm]] = await dbp.execute(
+        'SELECT PERM_STRIKES, PERM_BANIDO FROM permissoesusuarios WHERE USU_COD = ?',
+        [usuCod]
+      );
+
+      if (perm.PERM_STRIKES >= moderacao.LIMITE_STRIKES && perm.PERM_BANIDO !== 1) {
+        await dbp.execute(
+          'UPDATE permissoesusuarios SET PERM_BANIDO = 1, PERM_COMENTAR = 0 WHERE USU_COD = ?',
+          [usuCod]
+        );
+        await dbp.execute(
+          'INSERT INTO logsacoes (USU_COD, LOG_ACAO) VALUES (?, ?)',
+          [usuCod, `Banimento automático do moderador (${perm.PERM_STRIKES} strikes)`]
+        );
+        banidos.push({ usuario: info.nome, strikes: perm.PERM_STRIKES });
+      }
+    }
+
+    res.json({
+      analisados: comentarios.length,
+      removidos: aRemover.length,
+      usuariosAfetados: Object.keys(porUsuario).length,
+      banidos,
+      detalhes,
+      limiteStrikes: moderacao.LIMITE_STRIKES
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ erro: 'Falha na moderação' });
+  }
+});
+
+// Desbanir usuário (zera strikes e libera comentários) — admin
+app.post('/admin/usuarios/:id/desbanir', async (req, res) => {
+  try {
+    await dbp.execute(
+      'UPDATE permissoesusuarios SET PERM_BANIDO = 0, PERM_STRIKES = 0, PERM_COMENTAR = 1 WHERE USU_COD = ?',
+      [req.params.id]
+    );
+    await dbp.execute(
+      'INSERT INTO logsacoes (USU_COD, LOG_ACAO) VALUES (?, ?)',
+      [req.params.id, 'Desbanido manualmente pelo admin']
+    );
+    res.json({ msg: 'Usuário desbanido' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ erro: 'Falha ao desbanir' });
+  }
 });
 
 app.listen(port, () => {

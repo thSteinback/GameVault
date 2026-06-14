@@ -191,8 +191,10 @@
         <h3>Registros <span class="count-badge" id="userCount">0</span></h3>
         <div class="search-bar">
           <input type="text" id="buscaUsuario" placeholder="🔍 Buscar..." oninput="filtrarTexto(this.value)">
+          <button class="btn-acao" style="margin-left:10px;background:#8C8CFF;color:#13131a;font-weight:600;" onclick="moderar()">🛡 Moderar comentários</button>
         </div>
       </div>
+      <div id="modReport" style="display:none;margin:0 16px 12px;padding:12px 16px;border-radius:8px;background:rgba(140,140,255,0.12);color:#ddd;font-size:14px;"></div>
       <table>
         <thead>
           <tr>
@@ -303,10 +305,14 @@
             ${u.nome}
           </td>
           <td style="color:#aaa;">${u.email}</td>
-          <td><span class="badge ${u.isAdmin ? 'badge-admin' : 'badge-user'}">${u.isAdmin ? 'Admin' : 'Usuário'}</span></td>
+          <td>
+            <span class="badge ${u.isAdmin ? 'badge-admin' : 'badge-user'}">${u.isAdmin ? 'Admin' : 'Usuário'}</span>
+            ${u.banido ? '<span class="badge" style="background:#5a1f1f;color:#ff9b9b;">Banido</span>' : ''}
+          </td>
           <td style="color:#aaa;">${fmtData(u.dataCriacao)}</td>
           <td>
             <button class="btn-acao" onclick="abrirDetail(${u.id})">👁 Ver</button>
+            ${(!u.isAdmin && u.banido) ? `<button class="btn-acao" style="background:#1f5a2f;color:#9bffb0;" onclick="desbanir(${u.id})">✅ Desbanir</button>` : ''}
             ${!u.isAdmin ? `<button class="btn-acao danger" onclick="abrirConfirm(${u.id}, '${u.nome.replace(/'/g,"\\'")}')">🗑</button>` : ''}
           </td>
         </tr>`).join('')
@@ -375,6 +381,39 @@
         }
       });
     });
+
+    /* ── Moderação em lote ── */
+    async function moderar() {
+      const box = document.getElementById('modReport');
+      box.style.display = 'block';
+      box.innerHTML = '⏳ Analisando comentários...';
+      try {
+        const r = await fetch(`${BASE}/admin/moderar`, { method: 'POST' });
+        const d = await r.json();
+        if (!r.ok) { box.innerHTML = '❌ ' + (d.erro || 'Falha na moderação.'); return; }
+        let html = `🛡 <strong>${d.analisados}</strong> comentário(s) analisado(s) · `
+                 + `<strong>${d.removidos}</strong> removido(s) · `
+                 + `<strong>${d.usuariosAfetados}</strong> usuário(s) com strike.`;
+        if (d.banidos && d.banidos.length) {
+          html += '<br>🚫 Banido(s) (limite de ' + d.limiteStrikes + ' strikes): '
+                + d.banidos.map(b => `${b.usuario} (${b.strikes})`).join(', ');
+        }
+        box.innerHTML = html;
+        toast('✅ Moderação concluída!');
+        carregarUsuarios();
+      } catch {
+        box.innerHTML = '❌ Erro de conexão com o servidor.';
+      }
+    }
+
+    /* ── Desbanir ── */
+    async function desbanir(id) {
+      try {
+        const r = await fetch(`${BASE}/admin/usuarios/${id}/desbanir`, { method: 'POST' });
+        if (r.ok) { toast('✅ Usuário desbanido!'); carregarUsuarios(); }
+        else toast('❌ Erro ao desbanir.');
+      } catch { toast('❌ Erro de conexão!'); }
+    }
 
     carregarUsuarios();
   </script>
