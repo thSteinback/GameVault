@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <script src="js/guard.js"></script>
+  <script src="js/api.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GameVault — Controle de Usuários</title>
@@ -322,7 +323,7 @@
     /* ── Carregar usuários ── */
     async function carregarUsuarios() {
       try {
-        todosUsuarios = await fetch(`${BASE}/admin/usuarios`).then(r => r.json());
+        todosUsuarios = await adminFetch(`${BASE}/admin/usuarios`).then(r => r.json());
         renderTabela();
       } catch {
         document.getElementById('tbodyUsuarios').innerHTML =
@@ -366,7 +367,7 @@
       if (!pendingId) return;
       fecharConfirm();
       try {
-        const r = await fetch(`${BASE}/admin/usuarios/${pendingId}`, { method: 'DELETE' });
+        const r = await adminFetch(`${BASE}/admin/usuarios/${pendingId}`, { method: 'DELETE' });
         if (r.ok) { toast('✅ Usuário excluído!'); carregarUsuarios(); }
         else toast('❌ Erro ao excluir.');
       } catch { toast('❌ Erro de conexão!'); }
@@ -388,7 +389,7 @@
       box.style.display = 'block';
       box.innerHTML = '⏳ Analisando comentários...';
       try {
-        const r = await fetch(`${BASE}/admin/moderar`, { method: 'POST' });
+        const r = await adminFetch(`${BASE}/admin/moderar`, { method: 'POST' });
         const d = await r.json();
         if (!r.ok) { box.innerHTML = '❌ ' + (d.erro || 'Falha na moderação.'); return; }
         let html = `🛡 <strong>${d.analisados}</strong> comentário(s) analisado(s) · `
@@ -409,7 +410,7 @@
     /* ── Desbanir ── */
     async function desbanir(id) {
       try {
-        const r = await fetch(`${BASE}/admin/usuarios/${id}/desbanir`, { method: 'POST' });
+        const r = await adminFetch(`${BASE}/admin/usuarios/${id}/desbanir`, { method: 'POST' });
         if (r.ok) { toast('✅ Usuário desbanido!'); carregarUsuarios(); }
         else toast('❌ Erro ao desbanir.');
       } catch { toast('❌ Erro de conexão!'); }

@@ -1,0 +1,13 @@
+# Dependências
+node_modules/
+
+# Variáveis de ambiente (segredos!)
+.env
+
+# Uploads de usuários (não versionar imagens enviadas)
+uploads/*
+!uploads/.gitkeep
+
+# Logs e sistema
+*.log
+.DS_Store

@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <script src="js/guard.js"></script>
+  <script src="js/api.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GameVault — Dashboard</title>
@@ -256,8 +257,8 @@
     async function carregar() {
       try {
         const [jogos, users] = await Promise.all([
-          fetch(`${BASE}/admin/jogos`).then(r => r.json()),
-          fetch(`${BASE}/admin/usuarios`).then(r => r.json())
+          adminFetch(`${BASE}/admin/jogos`).then(r => r.json()),
+          adminFetch(`${BASE}/admin/usuarios`).then(r => r.json())
         ]);
 
         document.getElementById('statJogos').textContent    = jogos.length;

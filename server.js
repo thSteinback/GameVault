@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -5,21 +6,24 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const moderacao = require('./moderacao');
+const auth = require('./middlewares/auth');
+const isAdmin = require('./middlewares/isAdmin');
 
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'gamevault'
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASS || '',
+  database: process.env.DB_NAME || 'gamevault'
 });
 
 db.connect(err => {
@@ -36,6 +40,16 @@ const dbp = db.promise();
 /* ---------- CADASTRO (usuário comum) ---------- */
 app.post('/cadastrar', (req, res) => {
   const { nome, email, senha } = req.body;
+
+  // Validação no servidor (não confia só no front)
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email || '');
+  const senhaOk = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/.test(senha || '');
+  if (!nome || !nome.trim())
+    return res.json({ success: false, message: 'Nome de usuário obrigatório' });
+  if (!emailOk)
+    return res.json({ success: false, message: 'E-mail inválido' });
+  if (!senhaOk)
+    return res.json({ success: false, message: 'Senha fraca: mín. 8 caracteres, 1 maiúscula e 1 número' });
 
   db.query(
     'SELECT 1 FROM usuarios WHERE USU_NOME = ? OR USU_EMAIL = ?',
@@ -76,7 +90,7 @@ app.post('/login', (req, res) => {
     return res.status(400).json({ success: false, message: 'Preencha todos os campos' });
 
   db.query(
-    'SELECT USU_SENHA AS senhaDB, USU_TIPO FROM usuarios WHERE USU_NOME = ? OR USU_EMAIL = ?',
+    'SELECT USU_COD, USU_SENHA AS senhaDB, USU_TIPO FROM usuarios WHERE USU_NOME = ? OR USU_EMAIL = ?',
     [nome, nome],
     async (err, rUser) => {
       if (err) return res.status(500).json({ success: false, message: 'Erro no servidor' });
@@ -85,9 +99,17 @@ app.post('/login', (req, res) => {
         const senhaOk = await bcrypt.compare(senha, rUser[0].senhaDB);
         if (!senhaOk) return res.json({ success: false, message: 'Credenciais Inválidas' });
 
-        // Agora verifica o tipo direto na coluna
-        const isAdmin = rUser[0].USU_TIPO === 'admin';
-        return res.json({ success: true, isAdmin });
+        // Mantém a detecção de admin atual (coluna USU_TIPO)
+        const ehAdmin = rUser[0].USU_TIPO === 'admin';
+
+        // Emite um token assinado, usado para proteger as rotas /admin/*
+        const token = jwt.sign(
+          { id: rUser[0].USU_COD, nome, admin: ehAdmin },
+          process.env.JWT_SECRET,
+          { expiresIn: '2h' }
+        );
+
+        return res.json({ success: true, isAdmin: ehAdmin, token });
       }
 
       return res.json({ success: false, message: 'Credenciais Inválidas' });
@@ -207,6 +229,10 @@ app.get('/usuario-info', (req, res) => {
 /* ─────────────────────────────────────────
    ROTAS ADMIN
    ───────────────────────────────────────── */
+
+// Protege TODAS as rotas /admin/* (definidas a partir daqui):
+// exige token JWT válido (auth) e privilégio de administrador (isAdmin).
+app.use('/admin', auth, isAdmin);
 
 // Listar todos os jogos (admin)
 app.get('/admin/jogos', (req, res) => {

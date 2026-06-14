@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <script src="js/guard.js"></script> 
+  <script src="js/guard.js"></script>
+  <script src="js/api.js"></script> 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GameVault — Controle de Jogos</title>
@@ -301,7 +302,7 @@
     async function carregarJogos() {
       const tbody = document.getElementById('tbodyJogos');
       try {
-        todosJogos = await fetch(`${BASE}/admin/jogos`).then(r => r.json());
+        todosJogos = await adminFetch(`${BASE}/admin/jogos`).then(r => r.json());
         document.getElementById('jogoCount').textContent = todosJogos.length;
 
         tbody.innerHTML = todosJogos.length ? todosJogos.map(j => `
@@ -337,7 +338,7 @@
       if (img) fd.append('imagem', img);
 
       try {
-        const r = await fetch(`${BASE}/admin/jogos`, { method: 'POST', body: fd });
+        const r = await adminFetch(`${BASE}/admin/jogos`, { method: 'POST', body: fd });
         const data = await r.json();
         if (r.ok) {
           toast('✅ Jogo cadastrado com sucesso!');
@@ -368,7 +369,7 @@
       if (!pendingId) return;
       fecharConfirm();
       try {
-        const r = await fetch(`${BASE}/admin/jogos/${pendingId}`, { method: 'DELETE' });
+        const r = await adminFetch(`${BASE}/admin/jogos/${pendingId}`, { method: 'DELETE' });
         if (r.ok) { toast('✅ Jogo excluído!'); carregarJogos(); }
         else toast('❌ Erro ao excluir.');
       } catch { toast('❌ Erro de conexão!'); }

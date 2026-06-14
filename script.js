@@ -95,6 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
     btnSair.onclick = () => {
       localStorage.removeItem("usuarioLogado");
       localStorage.removeItem("isAdmin");
+      localStorage.removeItem("token");
       location.reload();
     };
     nav.appendChild(btnSair);
@@ -150,9 +151,10 @@ if (btnLogin) {
       if (data.success) {
         localStorage.setItem("usuarioLogado", usuario.value);
         localStorage.setItem("isAdmin", data.isAdmin ? "true" : "false");
+        if (data.token) localStorage.setItem("token", data.token);
         document.getElementById("loginModal").style.display = "none";
         if (data.isAdmin) {
-          window.location.href = "admin.html";
+          window.location.href = "admin/dashboard.html";
         } else {
           location.reload();
         }
@@ -226,7 +228,6 @@ if (btnCadastro) {
       });
 
       const data = await resp.json();
-      alert("data: " + JSON.stringify(data));
       if (data.success) {
         alert("Cadastro realizado com sucesso!");
         document.getElementById("cadastroModal").style.display = "none";
@@ -235,12 +236,11 @@ if (btnCadastro) {
         senha.value = "";
         confirmarSenha.value = "";
       } else {
-        if (data.message && data.message.includes("Nome de usuário")) {
-          exibirErro(usuario, data.message, erroUsuario);
-          exibirErro(email, data.message, erroEmail);
-        } else {
-          alert(data.message || "Erro ao cadastrar.");
-        }
+        const msg = data.message || "Erro ao cadastrar.";
+        if (/e-mail/i.test(msg)) exibirErro(email, msg, erroEmail);
+        else if (/senha/i.test(msg)) exibirErro(senha, msg, erroSenha);
+        else if (/nome|usu/i.test(msg)) exibirErro(usuario, msg, erroUsuario);
+        else alert(msg);
       }
     } catch (err) {
       alert("Erro de conexão com o servidor!");

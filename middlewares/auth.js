@@ -1,14 +1,16 @@
 const jwt = require('jsonwebtoken');
 
+// Exige um token JWT válido no header: Authorization: Bearer <token>
 module.exports = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ mensagem: 'Token ausente' });
+  const header = req.headers.authorization || '';
+  const token  = header.startsWith('Bearer ') ? header.slice(7) : null;
 
-  const token = authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ erro: 'Token ausente. Faça login.' });
+
   try {
     req.usuario = jwt.verify(token, process.env.JWT_SECRET);
     next();
   } catch {
-    return res.status(401).json({ mensagem: 'Token inválido' });
+    return res.status(401).json({ erro: 'Token inválido ou expirado.' });
   }
 };
