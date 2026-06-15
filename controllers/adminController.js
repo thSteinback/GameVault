@@ -1,6 +1,7 @@
 const moderacao  = require('../moderacao');
 const Usuario    = require('../models/usuarioModel');
 const Comentario = require('../models/comentarioModel');
+const Estat     = require('../models/estatisticaModel');
 
 exports.listarUsuarios = async (req, res) => {
   try { const [rows] = await Usuario.listarTodosComAdmins(); res.json(rows); }
@@ -80,4 +81,19 @@ exports.rebaixar = async (req, res) => {
     await Usuario.registrarLog(req.params.id, 'Rebaixado para usuário comum pelo admin');
     res.json({ msg: 'Usuário rebaixado' });
   } catch (e) { console.error(e); res.status(500).json({ erro: 'Falha ao rebaixar' }); }
+};
+
+exports.estatisticas = async (req, res) => {
+  try {
+    const [totais, [topAvaliadores], [jogosMaisFavoritados], [jogosMelhorAvaliados], [topComentaristas], [distribuicaoNotas]] =
+      await Promise.all([
+        Estat.totais(),
+        Estat.topAvaliadores(5),
+        Estat.jogosMaisFavoritados(5),
+        Estat.jogosMelhorAvaliados(5),
+        Estat.topComentaristas(5),
+        Estat.distribuicaoNotas()
+      ]);
+    res.json({ totais, topAvaliadores, jogosMaisFavoritados, jogosMelhorAvaliados, topComentaristas, distribuicaoNotas });
+  } catch (e) { console.error(e); res.status(500).json({ erro: 'Falha ao carregar estatísticas' }); }
 };

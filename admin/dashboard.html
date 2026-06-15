@@ -219,8 +219,44 @@
         </table>
       </div>
     </div>
+
+    <!-- ====== Estatísticas gerais ====== -->
+    <h2 class="page-title" style="margin-top:40px;">📈 Estatísticas gerais</h2>
+    <div class="stats-grid">
+      <div class="stat-card"><span class="s-icon">💬</span><span class="s-val" id="statComentarios">—</span><span class="s-lbl">Comentários</span></div>
+      <div class="stat-card"><span class="s-icon">⭐</span><span class="s-val" id="statAvaliacoes">—</span><span class="s-lbl">Avaliações</span></div>
+      <div class="stat-card"><span class="s-icon">❤️</span><span class="s-val" id="statFavoritos">—</span><span class="s-lbl">Favoritos</span></div>
+    </div>
+
+    <div class="row-2" style="margin-top:24px;">
+      <div class="panel">
+        <div class="panel-header"><h3>⭐ Distribuição de notas</h3></div>
+        <div style="position:relative;height:240px;"><canvas id="chartNotas"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h3>❤️ Jogos mais favoritados</h3></div>
+        <div style="position:relative;height:240px;"><canvas id="chartFavoritos"></canvas></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:24px;">
+      <div class="panel-header"><h3>🏆 Usuários com mais avaliações</h3></div>
+      <div style="position:relative;height:260px;"><canvas id="chartAvaliadores"></canvas></div>
+    </div>
+
+    <div class="row-2" style="margin-top:24px;">
+      <div class="panel">
+        <div class="panel-header"><h3>🥇 Jogos melhor avaliados</h3></div>
+        <ol id="listaMelhores" style="margin:0;padding:0 0 0 22px;color:#ddd;line-height:1.6;"><li class="empty-state">Carregando...</li></ol>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h3>✍️ Top comentaristas</h3></div>
+        <ol id="listaComentaristas" style="margin:0;padding:0 0 0 22px;color:#ddd;line-height:1.6;"><li class="empty-state">Carregando...</li></ol>
+      </div>
+    </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <script>
     const BASE = 'http://localhost:3000';
 
@@ -301,6 +337,64 @@
     }
 
     carregar();
+  </script>
+  <script>
+    /* ── Gráficos e rankings do dashboard ── */
+    (async function () {
+      try {
+        const d = await adminFetch(`${BASE}/admin/estatisticas`).then(r => r.json());
+        if (!d || d.erro) return;
+        const t = d.totais || {};
+        document.getElementById('statComentarios').textContent = t.comentarios ?? 0;
+        document.getElementById('statAvaliacoes').textContent  = t.avaliacoes ?? 0;
+        document.getElementById('statFavoritos').textContent   = t.favoritos ?? 0;
+
+        if (typeof Chart === 'undefined') return;
+        Chart.defaults.color = '#bbb';
+        const grid = 'rgba(255,255,255,0.08)';
+        const barOpts = { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: grid } }, y: { grid: { display: false } } } };
+
+        // Distribuição de notas (rosca)
+        const dist = { 1:0, 2:0, 3:0, 4:0, 5:0 };
+        (d.distribuicaoNotas || []).forEach(r => { dist[r.nota] = r.total; });
+        new Chart(document.getElementById('chartNotas'), {
+          type: 'doughnut',
+          data: { labels: ['1★','2★','3★','4★','5★'],
+            datasets: [{ data: [dist[1],dist[2],dist[3],dist[4],dist[5]],
+              backgroundColor: ['#ff6b6b','#ffa94d','#ffd43b','#94d82d','#51cf66'] }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+        });
+
+        // Jogos mais favoritados
+        const fav = d.jogosMaisFavoritados || [];
+        new Chart(document.getElementById('chartFavoritos'), {
+          type: 'bar',
+          data: { labels: fav.map(x => x.nome), datasets: [{ data: fav.map(x => x.total), backgroundColor: '#ff8fae' }] },
+          options: barOpts
+        });
+
+        // Usuários com mais avaliações
+        const av = d.topAvaliadores || [];
+        new Chart(document.getElementById('chartAvaliadores'), {
+          type: 'bar',
+          data: { labels: av.map(x => x.nome), datasets: [{ data: av.map(x => x.total), backgroundColor: '#8C8CFF' }] },
+          options: barOpts
+        });
+
+        // Listas de ranking
+        const esc = s => { const x = document.createElement('div'); x.textContent = s == null ? '' : s; return x.innerHTML; };
+        const melhores = d.jogosMelhorAvaliados || [];
+        document.getElementById('listaMelhores').innerHTML = melhores.length
+          ? melhores.map(j => `<li>${esc(j.nome)} — <strong style="color:#f5c518;">${Number(j.media).toFixed(1)}</strong> <span style="color:#888;font-size:12px;">(${j.total} aval.)</span></li>`).join('')
+          : '<li class="empty-state">Sem avaliações ainda.</li>';
+        const com = d.topComentaristas || [];
+        document.getElementById('listaComentaristas').innerHTML = com.length
+          ? com.map(u => `<li>${esc(u.nome)} — <strong>${u.total}</strong></li>`).join('')
+          : '<li class="empty-state">Sem comentários ainda.</li>';
+      } catch (e) { console.error('Falha ao carregar estatísticas', e); }
+    })();
   </script>
 </body>
 </html>

@@ -9,6 +9,7 @@ router.post('/jogos', upload.single('imagem'), jogo.criar);
 router.delete('/jogos/:id', jogo.excluir);
 
 router.get('/usuarios', admin.listarUsuarios);
+router.get('/estatisticas', admin.estatisticas);
 router.delete('/usuarios/:id', admin.excluirUsuario);
 
 router.post('/moderar', admin.moderar);
