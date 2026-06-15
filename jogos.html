@@ -220,152 +220,8 @@
 
   <!-- Grid de jogos + paginação -->
   <div class="games-section">
-    <div class="game-grid">
-      <!-- Exemplo de card; replique para cada jogo -->
-      <div class="game-card">
-        <img src="caminho/para/imagem.jpg" alt="Nome do Jogo" />
-        <div class="card-body">
-          <p class="title">Nome do Jogo</p>
-          <div class="rating">
-            <div class="stars">
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-            </div>
-            <span class="rating-number">–</span>
-          </div>
-        </div>
-      </div>
-      <div class="game-card">
-        <img src="caminho/para/imagem.jpg" alt="Nome do Jogo" />
-        <div class="card-body">
-          <p class="title">Nome do Jogo</p>
-          <div class="rating">
-            <div class="stars">
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-            </div>
-            <span class="rating-number">–</span>
-          </div>
-        </div>
-      </div>
-      <div class="game-card">
-        <img src="caminho/para/imagem.jpg" alt="Nome do Jogo" />
-        <div class="card-body">
-          <p class="title">Nome do Jogo</p>
-          <div class="rating">
-            <div class="stars">
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-            </div>
-            <span class="rating-number">–</span>
-          </div>
-        </div>
-      </div>
-      <div class="game-card">
-        <img src="caminho/para/imagem.jpg" alt="Nome do Jogo" />
-        <div class="card-body">
-          <p class="title">Nome do Jogo</p>
-          <div class="rating">
-            <div class="stars">
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-            </div>
-            <span class="rating-number">–</span>
-          </div>
-        </div>
-      </div>
-      <div class="game-card">
-        <img src="caminho/para/imagem.jpg" alt="Nome do Jogo" />
-        <div class="card-body">
-          <p class="title">Nome do Jogo</p>
-          <div class="rating">
-            <div class="stars">
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-            </div>
-            <span class="rating-number">–</span>
-          </div>
-        </div>
-      </div>
-      <div class="game-card">
-        <img src="caminho/para/imagem.jpg" alt="Nome do Jogo" />
-        <div class="card-body">
-          <p class="title">Nome do Jogo</p>
-          <div class="rating">
-            <div class="stars">
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-            </div>
-            <span class="rating-number">–</span>
-          </div>
-        </div>
-      </div>
-      <div class="game-card">
-        <img src="caminho/para/imagem.jpg" alt="Nome do Jogo" />
-        <div class="card-body">
-          <p class="title">Nome do Jogo</p>
-          <div class="rating">
-            <div class="stars">
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-            </div>
-            <span class="rating-number">–</span>
-          </div>
-        </div>
-      </div>
-      <div class="game-card">
-        <img src="caminho/para/imagem.jpg" alt="Nome do Jogo" />
-        <div class="card-body">
-          <p class="title">Nome do Jogo</p>
-          <div class="rating">
-            <div class="stars">
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-            </div>
-            <span class="rating-number">–</span>
-          </div>
-        </div>
-      </div>
-      <div class="game-card">
-        <img src="caminho/para/imagem.jpg" alt="Nome do Jogo" />
-        <div class="card-body">
-          <p class="title">Nome do Jogo</p>
-          <div class="rating">
-            <div class="stars">
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-              <span class="star">☆</span>
-            </div>
-            <span class="rating-number">–</span>
-          </div>
-        </div>
-      </div>
+    <div class="game-grid" id="game-grid">
+      <p style="grid-column:1/-1;text-align:center;color:#aaa;">Carregando jogos…</p>
     </div>
 
     <div class="pagination">
@@ -446,5 +302,53 @@
     </div>
   </div>
   <script src="script.js"></script>
+  <script>
+    /* ── Catálogo dinâmico de jogos ── */
+    (function () {
+      const API = 'http://localhost:3000';
+      const grid = document.getElementById('game-grid');
+      if (!grid) return;
+
+      const FALLBACK = 'imagens/logoGV.png';
+
+      function estrelas(media) {
+        const m = Math.round(media || 0);
+        let h = "";
+        for (let i = 1; i <= 5; i++) h += `<span class="star">${i <= m ? "★" : "☆"}</span>`;
+        return h;
+      }
+
+      function card(j) {
+        const img = j.JOG_IMG ? `${API}/uploads/${j.JOG_IMG}` : FALLBACK;
+        const nome = j.JOG_NOME || 'Sem nome';
+        const media = j.media ? Number(j.media) : 0;
+        const nota = media > 0 ? media.toFixed(1) : '–';
+        return `
+          <a class="game-card" href="descJogo.html?id=${j.JOG_COD}" style="text-decoration:none;color:inherit;">
+            <img src="${img}" alt="${nome}" onerror="this.onerror=null;this.src='${FALLBACK}'" />
+            <div class="card-body">
+              <p class="title">${nome}</p>
+              <div class="rating">
+                <div class="stars">${estrelas(media)}</div>
+                <span class="rating-number">${nota}</span>
+              </div>
+            </div>
+          </a>`;
+      }
+
+      fetch(`${API}/jogos`)
+        .then(r => r.json())
+        .then(jogos => {
+          if (!Array.isArray(jogos) || jogos.length === 0) {
+            grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#aaa;">Nenhum jogo cadastrado ainda.</p>';
+            return;
+          }
+          grid.innerHTML = jogos.map(card).join('');
+        })
+        .catch(() => {
+          grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#aaa;">Erro ao carregar jogos. O servidor está rodando?</p>';
+        });
+    })();
+  </script>
 </body>
 </html>

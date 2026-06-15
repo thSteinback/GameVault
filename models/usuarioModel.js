@@ -59,7 +59,7 @@ exports.criarPermissoes = (usuCod) =>
   );
 
 exports.getPermissoes = (usuCod) =>
-  pool.execute('SELECT PERM_BANIDO, PERM_COMENTAR, PERM_STRIKES FROM permissoesusuarios WHERE USU_COD = ?', [usuCod]);
+  pool.execute('SELECT PERM_BANIDO, PERM_COMENTAR, PERM_AVALIAR, PERM_STRIKES FROM permissoesusuarios WHERE USU_COD = ?', [usuCod]);
 
 exports.somarStrikes = (usuCod, qtd) =>
   pool.execute(

@@ -58,5 +58,69 @@
   </footer>
 
   <script src="script.js"></script>
+  <script>
+    /* ── Carrega os jogos favoritados do usuário ── */
+    (function () {
+      const API = 'http://localhost:3000';
+      const FALLBACK = 'imagens/logoGV.png';
+      const cont = document.getElementById('cards-container');
+      if (!cont) return;
+
+      cont.style.display = 'grid';
+      cont.style.gridTemplateColumns = 'repeat(auto-fill, minmax(180px, 1fr))';
+      cont.style.gap = '18px';
+
+      const usuarioLogado = localStorage.getItem('usuarioLogado');
+      if (!usuarioLogado) {
+        cont.innerHTML = '<p style="color:#aaa;">Faça login para ver seus favoritos.</p>';
+        return;
+      }
+
+      const escapar = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; };
+
+      function render(jogos) {
+        if (!Array.isArray(jogos) || !jogos.length) {
+          cont.innerHTML = '<p style="color:#aaa;">Você ainda não favoritou nenhum jogo.</p>';
+          return;
+        }
+        cont.innerHTML = jogos.map(j => {
+          const img = j.JOG_IMG ? `${API}/uploads/${j.JOG_IMG}` : FALLBACK;
+          const nome = escapar(j.JOG_NOME || 'Sem nome');
+          return `
+            <div class="game-card" style="position:relative;">
+              <a href="descJogo.html?id=${j.JOG_COD}" style="text-decoration:none;color:inherit;">
+                <img src="${img}" alt="${nome}" onerror="this.onerror=null;this.src='${FALLBACK}'" />
+                <div class="card-body"><p class="title">${nome}</p></div>
+              </a>
+              <button class="remover-fav" data-id="${j.JOG_COD}" title="Remover dos favoritos"
+                style="position:absolute;top:8px;right:8px;border:0;border-radius:50%;width:28px;height:28px;cursor:pointer;background:rgba(20,20,26,0.85);color:#ff9b9b;font-weight:700;">✕</button>
+            </div>`;
+        }).join('');
+
+        cont.querySelectorAll('.remover-fav').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            fetch(`${API}/favoritos/toggle`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ nome: usuarioLogado, jogo: id })
+            })
+              .then(r => r.json())
+              .then(() => {
+                btn.closest('.game-card').remove();
+                if (!cont.querySelector('.game-card'))
+                  cont.innerHTML = '<p style="color:#aaa;">Você ainda não favoritou nenhum jogo.</p>';
+              })
+              .catch(() => alert('Erro ao remover.'));
+          });
+        });
+      }
+
+      fetch(`${API}/favoritos?nome=${encodeURIComponent(usuarioLogado)}`)
+        .then(r => r.json())
+        .then(render)
+        .catch(() => { cont.innerHTML = '<p style="color:#aaa;">Erro ao carregar favoritos.</p>'; });
+    })();
+  </script>
 </body>
 </html>

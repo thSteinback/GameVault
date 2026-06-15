@@ -1,394 +1,229 @@
--- MariaDB dump 10.19  Distrib 10.4.32-MariaDB, for Win64 (AMD64)
---
--- Host: localhost    Database: gamevault
--- ------------------------------------------------------
--- Server version	10.4.32-MariaDB
+mysql  Ver 15.1 Distrib 10.4.32-MariaDB, for Win64 (AMD64), source revision c4143f909528e3fab0677a28631d10389354c491
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+Usage: mysql [OPTIONS] [database]
 
---
--- Table structure for table `administradores`
---
+Default options are read from the following files in the given order:
+C:\WINDOWS\my.ini C:\WINDOWS\my.cnf C:\my.ini C:\my.cnf C:\xampp\mysql\my.ini C:\xampp\mysql\my.cnf C:\xampp\mysql\data\my.ini C:\xampp\mysql\data\my.cnf C:\xampp\mysql\bin\my.ini C:\xampp\mysql\bin\my.cnf 
+The following groups are read: mysql mariadb-client client client-server client-mariadb
+The following options may be given as the first argument:
+--print-defaults          Print the program argument list and exit.
+--no-defaults             Don't read default options from any option file.
+The following specify which files/extra groups are read (specified before remaining options):
+--defaults-file=#         Only read default options from the given file #.
+--defaults-extra-file=#   Read this file after the global files are read.
+--defaults-group-suffix=# Additionally read default groups with # appended as a suffix.
 
-DROP TABLE IF EXISTS `administradores`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `administradores` (
-  `ADM_COD` int(11) NOT NULL AUTO_INCREMENT,
-  `ADM_NOME` varchar(50) NOT NULL,
-  `ADM_EMAIL` varchar(100) NOT NULL,
-  `ADM_SENHA` varchar(255) NOT NULL,
-  `ADM_DATA_CRIACAO` datetime DEFAULT current_timestamp(),
-  PRIMARY KEY (`ADM_COD`),
-  UNIQUE KEY `ADM_EMAIL` (`ADM_EMAIL`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  -?, --help          Display this help and exit.
+  -I, --help          Synonym for -?
+  --abort-source-on-error 
+                      Abort 'source filename' operations in case of errors
+  --auto-rehash       Enable automatic rehashing. One doesn't need to use
+                      'rehash' to get table and field completion, but startup
+                      and reconnecting may take a longer time. Disable with
+                      --disable-auto-rehash.
+                      (Defaults to on; use --skip-auto-rehash to disable.)
+  -A, --no-auto-rehash 
+                      No automatic rehashing. One has to use 'rehash' to get
+                      table and field completion. This gives a quicker start of
+                      mysql and disables rehashing on reconnect.
+  --auto-vertical-output 
+                      Automatically switch to vertical output mode if the
+                      result is wider than the terminal width.
+  -B, --batch         Don't use history file. Disable interactive behavior.
+                      (Enables --silent.)
+  --binary-as-hex     Print binary data as hex
+  --character-sets-dir=name 
+                      Directory for character set files.
+  --column-type-info  Display column type information.
+  -c, --comments      Preserve comments. Send comments to the server. The
+                      default is --skip-comments (discard comments), enable
+                      with --comments.
+  -C, --compress      Use compression in server/client protocol.
+  -#, --debug[=#]     This is a non-debug version. Catch this and exit.
+  --debug-check       Check memory and open file usage at exit.
+  -T, --debug-info    Print some debug info at exit.
+  -D, --database=name Database to use.
+  --default-character-set=name 
+                      Set the default character set.
+  --delimiter=name    Delimiter to be used.
+  -e, --execute=name  Execute command and quit. (Disables --force and history
+                      file.)
+  --enable-cleartext-plugin 
+                      Obsolete option. Exists only for MySQL compatibility.
+  -E, --vertical      Print the output of a query (rows) vertically.
+  -f, --force         Continue even if we get an SQL error. Sets
+                      abort-source-on-error to 0
+  -G, --named-commands 
+                      Enable named commands. Named commands mean this program's
+                      internal commands; see mysql> help . When enabled, the
+                      named commands can be used from any line of the query,
+                      otherwise only from the first line, before an enter.
+                      Disable with --disable-named-commands. This option is
+                      disabled by default.
+  -i, --ignore-spaces Ignore space after function names.
+  --init-command=name SQL Command to execute when connecting to MariaDB server.
+                      Will automatically be re-executed when reconnecting.
+  --local-infile      Enable/disable LOAD DATA LOCAL INFILE.
+  -b, --no-beep       Turn off beep on error.
+  -h, --host=name     Connect to host.
+  -H, --html          Produce HTML output.
+  -X, --xml           Produce XML output.
+  --line-numbers      Write line numbers for errors.
+                      (Defaults to on; use --skip-line-numbers to disable.)
+  -L, --skip-line-numbers 
+                      Don't write line number for errors.
+  -n, --unbuffered    Flush buffer after each query.
+  --column-names      Write column names in results.
+                      (Defaults to on; use --skip-column-names to disable.)
+  -N, --skip-column-names 
+                      Don't write column names in results.
+  --sigint-ignore     Ignore SIGINT (CTRL-C).
+  -o, --one-database  Ignore statements except those that occur while the
+                      default database is the one named at the command line.
+  --pager[=name]      Pager to use to display results. If you don't supply an
+                      option, the default pager is taken from your ENV variable
+                      PAGER. Valid pagers are less, more, cat [> filename],
+                      etc. See interactive help (\h) also. This option does not
+                      work in batch mode. Disable with --disable-pager. This
+                      option is disabled by default.
+  -p, --password[=name] 
+                      Password to use when connecting to server. If password is
+                      not given it's asked from the tty.
+  -W, --pipe          Use named pipes to connect to server.
+  -P, --port=#        Port number to use for connection or 0 for default to, in
+                      order of preference, my.cnf, $MYSQL_TCP_PORT,
+                      /etc/services, built-in default (3306).
+  --progress-reports  Get progress reports for long running commands (like
+                      ALTER TABLE)
+                      (Defaults to on; use --skip-progress-reports to disable.)
+  --prompt=name       Set the command line prompt to this value.
+  --protocol=name     The protocol to use for connection (tcp, socket, pipe).
+  -q, --quick         Don't cache result, print it row by row. This may slow
+                      down the server if the output is suspended. Doesn't use
+                      history file.
+  -r, --raw           Write fields without conversion. Used with --batch.
+  --reconnect         Reconnect if the connection is lost. Disable with
+                      --disable-reconnect. This option is enabled by default.
+                      (Defaults to on; use --skip-reconnect to disable.)
+  -s, --silent        Be more silent. Print results with a tab as separator,
+                      each row on new line.
+  -S, --socket=name   The socket file to use for connection.
+  --ssl               Enable SSL for connection (automatically enabled with
+                      other flags).
+  --ssl-ca=name       CA file in PEM format (check OpenSSL docs, implies
+                      --ssl).
+  --ssl-capath=name   CA directory (check OpenSSL docs, implies --ssl).
+  --ssl-cert=name     X509 cert in PEM format (implies --ssl).
+  --ssl-cipher=name   SSL cipher to use (implies --ssl).
+  --ssl-key=name      X509 key in PEM format (implies --ssl).
+  --ssl-crl=name      Certificate revocation list (implies --ssl).
+  --ssl-crlpath=name  Certificate revocation list path (implies --ssl).
+  --tls-version=name  TLS protocol version for secure connection.
+  --ssl-verify-server-cert 
+                      Verify server's "Common Name" in its cert against
+                      hostname used when connecting. This option is disabled by
+                      default.
+  -t, --table         Output in table format.
+  --tee=name          Append everything into outfile. See interactive help (\h)
+                      also. Does not work in batch mode. Disable with
+                      --disable-tee. This option is disabled by default.
+  -u, --user=name     User for login if not current user.
+  -U, --safe-updates  Only allow UPDATE and DELETE that uses keys.
+  -U, --i-am-a-dummy  Synonym for option --safe-updates, -U.
+  -v, --verbose       Write more. (-v -v -v gives the table output format).
+  -V, --version       Output version information and exit.
+  -w, --wait          Wait and retry if connection is down.
+  --connect-timeout=# Number of seconds before connection timeout.
+  --max-allowed-packet=# 
+                      The maximum packet length to send to or receive from
+                      server.
+  --net-buffer-length=# 
+                      The buffer size for TCP/IP and socket communication.
+  --select-limit=#    Automatic limit for SELECT when using --safe-updates.
+  --max-join-size=#   Automatic limit for rows in a join when using
+                      --safe-updates.
+  --secure-auth       Refuse client connecting to server if it uses old
+                      (pre-4.1.1) protocol.
+  --server-arg=name   Send embedded server this as a parameter.
+  --show-warnings     Show warnings after every statement.
+  --plugin-dir=name   Directory for client-side plugins.
+  --default-auth=name Default authentication client-side plugin to use.
+  --binary-mode       Binary mode allows certain character sequences to be
+                      processed as data that would otherwise be treated with a
+                      special meaning by the parser. Specifically, this switch
+                      turns off parsing of all client commands except \C and
+                      DELIMITER in non-interactive mode (i.e., when binary mode
+                      is combined with either 1) piped input, 2) the --batch
+                      mysql option, or 3) the 'source' command). Also, in
+                      binary mode, occurrences of '\r\n' and ASCII '\0' are
+                      preserved within strings, whereas by default, '\r\n' is
+                      translated to '\n' and '\0' is disallowed in user input.
+  --connect-expired-password 
+                      Notify the server that this client is prepared to handle
+                      expired password sandbox mode even if --batch was
+                      specified.
 
---
--- Dumping data for table `administradores`
---
-
-LOCK TABLES `administradores` WRITE;
-/*!40000 ALTER TABLE `administradores` DISABLE KEYS */;
-/*!40000 ALTER TABLE `administradores` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `avaliacoes`
---
-
-DROP TABLE IF EXISTS `avaliacoes`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `avaliacoes` (
-  `AVL_COD` int(11) NOT NULL AUTO_INCREMENT,
-  `USU_COD` int(11) DEFAULT NULL,
-  `JOG_COD` int(11) DEFAULT NULL,
-  `AVL_NOTA` int(11) DEFAULT NULL CHECK (`AVL_NOTA` between 1 and 10),
-  `AVL_TEXTO` text DEFAULT NULL,
-  `AVL_DATA` datetime DEFAULT current_timestamp(),
-  PRIMARY KEY (`AVL_COD`),
-  KEY `USU_COD` (`USU_COD`),
-  KEY `JOG_COD` (`JOG_COD`),
-  CONSTRAINT `avaliacoes_ibfk_1` FOREIGN KEY (`USU_COD`) REFERENCES `usuarios` (`USU_COD`) ON DELETE CASCADE,
-  CONSTRAINT `avaliacoes_ibfk_2` FOREIGN KEY (`JOG_COD`) REFERENCES `jogos` (`JOG_COD`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `avaliacoes`
---
-
-LOCK TABLES `avaliacoes` WRITE;
-/*!40000 ALTER TABLE `avaliacoes` DISABLE KEYS */;
-/*!40000 ALTER TABLE `avaliacoes` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `categorias`
---
-
-DROP TABLE IF EXISTS `categorias`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `categorias` (
-  `CAT_COD` int(11) NOT NULL AUTO_INCREMENT,
-  `CAT_NOME` varchar(50) NOT NULL,
-  PRIMARY KEY (`CAT_COD`),
-  UNIQUE KEY `CAT_NOME` (`CAT_NOME`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `categorias`
---
-
-LOCK TABLES `categorias` WRITE;
-/*!40000 ALTER TABLE `categorias` DISABLE KEYS */;
-/*!40000 ALTER TABLE `categorias` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `comentarios`
---
-
-DROP TABLE IF EXISTS `comentarios`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `comentarios` (
-  `COM_COD` int(11) NOT NULL AUTO_INCREMENT,
-  `USU_COD` int(11) DEFAULT NULL,
-  `JOG_COD` int(11) DEFAULT NULL,
-  `COM_TEXTO` text DEFAULT NULL,
-  `COM_DATA` datetime DEFAULT current_timestamp(),
-  PRIMARY KEY (`COM_COD`),
-  KEY `USU_COD` (`USU_COD`),
-  KEY `JOG_COD` (`JOG_COD`),
-  CONSTRAINT `comentarios_ibfk_1` FOREIGN KEY (`USU_COD`) REFERENCES `usuarios` (`USU_COD`) ON DELETE CASCADE,
-  CONSTRAINT `comentarios_ibfk_2` FOREIGN KEY (`JOG_COD`) REFERENCES `jogos` (`JOG_COD`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `comentarios`
---
-
-LOCK TABLES `comentarios` WRITE;
-/*!40000 ALTER TABLE `comentarios` DISABLE KEYS */;
-/*!40000 ALTER TABLE `comentarios` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `favoritos`
---
-
-DROP TABLE IF EXISTS `favoritos`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `favoritos` (
-  `USU_COD` int(11) NOT NULL,
-  `JOG_COD` int(11) NOT NULL,
-  PRIMARY KEY (`USU_COD`,`JOG_COD`),
-  KEY `JOG_COD` (`JOG_COD`),
-  CONSTRAINT `favoritos_ibfk_1` FOREIGN KEY (`USU_COD`) REFERENCES `usuarios` (`USU_COD`) ON DELETE CASCADE,
-  CONSTRAINT `favoritos_ibfk_2` FOREIGN KEY (`JOG_COD`) REFERENCES `jogos` (`JOG_COD`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `favoritos`
---
-
-LOCK TABLES `favoritos` WRITE;
-/*!40000 ALTER TABLE `favoritos` DISABLE KEYS */;
-/*!40000 ALTER TABLE `favoritos` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `jogos`
---
-
-DROP TABLE IF EXISTS `jogos`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `jogos` (
-  `JOG_COD` int(11) NOT NULL AUTO_INCREMENT,
-  `JOG_NOME` varchar(100) NOT NULL,
-  `JOG_DESC` text DEFAULT NULL,
-  `JOG_IMG` varchar(255) DEFAULT NULL,
-  `JOG_DATA_CADASTRO` datetime DEFAULT current_timestamp(),
-  `JOG_ATIVO` tinyint(4) DEFAULT 1,
-  `JOG_DATA_ATUALIZACAO` datetime DEFAULT NULL,
-  PRIMARY KEY (`JOG_COD`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `jogos`
---
-
-LOCK TABLES `jogos` WRITE;
-/*!40000 ALTER TABLE `jogos` DISABLE KEYS */;
-/*!40000 ALTER TABLE `jogos` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_ZERO_IN_DATE,NO_ZERO_DATE,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER trg_jogos_update_data
-BEFORE UPDATE ON jogos
-FOR EACH ROW
-BEGIN
-SET NEW.JOG_DATA_ATUALIZACAO = NOW();
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-
---
--- Table structure for table `jogoscategorias`
---
-
-DROP TABLE IF EXISTS `jogoscategorias`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `jogoscategorias` (
-  `JOG_COD` int(11) NOT NULL,
-  `CAT_COD` int(11) NOT NULL,
-  PRIMARY KEY (`JOG_COD`,`CAT_COD`),
-  KEY `CAT_COD` (`CAT_COD`),
-  CONSTRAINT `jogoscategorias_ibfk_1` FOREIGN KEY (`JOG_COD`) REFERENCES `jogos` (`JOG_COD`) ON DELETE CASCADE,
-  CONSTRAINT `jogoscategorias_ibfk_2` FOREIGN KEY (`CAT_COD`) REFERENCES `categorias` (`CAT_COD`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `jogoscategorias`
---
-
-LOCK TABLES `jogoscategorias` WRITE;
-/*!40000 ALTER TABLE `jogoscategorias` DISABLE KEYS */;
-/*!40000 ALTER TABLE `jogoscategorias` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `logsacoes`
---
-
-DROP TABLE IF EXISTS `logsacoes`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `logsacoes` (
-  `LOG_COD` int(11) NOT NULL AUTO_INCREMENT,
-  `ADM_COD` int(11) DEFAULT NULL,
-  `USU_COD` int(11) DEFAULT NULL,
-  `LOG_ACAO` varchar(255) DEFAULT NULL,
-  `LOG_DATA` datetime DEFAULT current_timestamp(),
-  PRIMARY KEY (`LOG_COD`),
-  KEY `ADM_COD` (`ADM_COD`),
-  KEY `USU_COD` (`USU_COD`),
-  CONSTRAINT `logsacoes_ibfk_1` FOREIGN KEY (`ADM_COD`) REFERENCES `administradores` (`ADM_COD`),
-  CONSTRAINT `logsacoes_ibfk_2` FOREIGN KEY (`USU_COD`) REFERENCES `usuarios` (`USU_COD`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `logsacoes`
---
-
-LOCK TABLES `logsacoes` WRITE;
-/*!40000 ALTER TABLE `logsacoes` DISABLE KEYS */;
-/*!40000 ALTER TABLE `logsacoes` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `permissoesusuarios`
---
-
-DROP TABLE IF EXISTS `permissoesusuarios`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `permissoesusuarios` (
-  `USU_COD` int(11) NOT NULL,
-  `PERM_BANIDO` tinyint(4) DEFAULT 0,
-  `PERM_AVALIAR` tinyint(4) DEFAULT 1,
-  `PERM_COMENTAR` tinyint(4) DEFAULT 1,
-  `PERM_DATA_ATUALIZACAO` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`USU_COD`),
-  CONSTRAINT `permissoesusuarios_ibfk_1` FOREIGN KEY (`USU_COD`) REFERENCES `usuarios` (`USU_COD`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `permissoesusuarios`
---
-
-LOCK TABLES `permissoesusuarios` WRITE;
-/*!40000 ALTER TABLE `permissoesusuarios` DISABLE KEYS */;
-/*!40000 ALTER TABLE `permissoesusuarios` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `usuarios`
---
-
-DROP TABLE IF EXISTS `usuarios`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `usuarios` (
-  `USU_COD` int(11) NOT NULL AUTO_INCREMENT,
-  `USU_NOME` varchar(50) NOT NULL,
-  `USU_EMAIL` varchar(100) NOT NULL,
-  `USU_SENHA` varchar(255) NOT NULL,
-  `USU_AVATAR` varchar(255) DEFAULT NULL,
-  `USU_BANNER` varchar(255) DEFAULT NULL,
-  `USU_DATA_CRIACAO` datetime DEFAULT current_timestamp(),
-  `USU_BG` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`USU_COD`),
-  UNIQUE KEY `USU_NOME` (`USU_NOME`),
-  UNIQUE KEY `USU_EMAIL` (`USU_EMAIL`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `usuarios`
---
-
-LOCK TABLES `usuarios` WRITE;
-/*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'Stein','thomas@gmail.com','$2b$10$.4OUW12muez.vbjAsQ0go.z6HZs4UiaWdJPNVNkGjw.DGwY28LsYq','1748189095220.png','1749294769081.jpg','2025-05-24 23:41:00',NULL),(2,'Barp','bianca@gmail.com','$2b$10$wJf//EMwI9gziA0lj8/MM.NcOadNoloZ3CcU/PidUyo1Ij6ADuZ4i','1748183577427.jpg',NULL,'2025-05-24 23:48:38',NULL);
-/*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Temporary table structure for view `vw_jogos_categorias`
---
-
-DROP TABLE IF EXISTS `vw_jogos_categorias`;
-/*!50001 DROP VIEW IF EXISTS `vw_jogos_categorias`*/;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
-/*!50001 CREATE VIEW `vw_jogos_categorias` AS SELECT
- 1 AS `JOG_COD`,
-  1 AS `JOG_NOME`,
-  1 AS `JOG_DESC`,
-  1 AS `JOG_ATIVO`,
-  1 AS `CAT_NOME` */;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary table structure for view `vw_usuarios_avaliacoes`
---
-
-DROP TABLE IF EXISTS `vw_usuarios_avaliacoes`;
-/*!50001 DROP VIEW IF EXISTS `vw_usuarios_avaliacoes`*/;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
-/*!50001 CREATE VIEW `vw_usuarios_avaliacoes` AS SELECT
- 1 AS `USU_COD`,
-  1 AS `USU_NOME`,
-  1 AS `TOTAL_AVALIACOES` */;
-SET character_set_client = @saved_cs_client;
-
---
--- Final view structure for view `vw_jogos_categorias`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_jogos_categorias`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_general_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `vw_jogos_categorias` AS select `j`.`JOG_COD` AS `JOG_COD`,`j`.`JOG_NOME` AS `JOG_NOME`,`j`.`JOG_DESC` AS `JOG_DESC`,`j`.`JOG_ATIVO` AS `JOG_ATIVO`,`c`.`CAT_NOME` AS `CAT_NOME` from ((`jogos` `j` join `jogoscategorias` `jc` on(`j`.`JOG_COD` = `jc`.`JOG_COD`)) join `categorias` `c` on(`jc`.`CAT_COD` = `c`.`CAT_COD`)) where `j`.`JOG_ATIVO` = 1 */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vw_usuarios_avaliacoes`
---
-
-/*!50001 DROP VIEW IF EXISTS `vw_usuarios_avaliacoes`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_general_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `vw_usuarios_avaliacoes` AS select `u`.`USU_COD` AS `USU_COD`,`u`.`USU_NOME` AS `USU_NOME`,count(`a`.`AVL_COD`) AS `TOTAL_AVALIACOES` from (`usuarios` `u` left join `avaliacoes` `a` on(`u`.`USU_COD` = `a`.`USU_COD`)) group by `u`.`USU_COD` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2026-05-25 12:05:16
+Variables (--variable-name=value)
+and boolean options {FALSE|TRUE}  Value (after reading options)
+--------------------------------- ----------------------------------------
+abort-source-on-error             FALSE
+auto-rehash                       TRUE
+auto-vertical-output              FALSE
+binary-as-hex                     FALSE
+character-sets-dir                (No default value)
+column-type-info                  FALSE
+comments                          FALSE
+compress                          FALSE
+debug-check                       FALSE
+debug-info                        FALSE
+database                          (No default value)
+default-character-set             utf8mb4
+delimiter                         ;
+vertical                          FALSE
+force                             FALSE
+named-commands                    FALSE
+ignore-spaces                     FALSE
+init-command                      (No default value)
+local-infile                      FALSE
+no-beep                           FALSE
+host                              (No default value)
+html                              FALSE
+xml                               FALSE
+line-numbers                      TRUE
+unbuffered                        FALSE
+column-names                      TRUE
+sigint-ignore                     FALSE
+port                              3306
+progress-reports                  FALSE
+prompt                            \N [\d]> 
+protocol                          
+quick                             FALSE
+raw                               FALSE
+reconnect                         FALSE
+socket                            C:/xampp/mysql/mysql.sock
+ssl                               FALSE
+ssl-ca                            (No default value)
+ssl-capath                        (No default value)
+ssl-cert                          (No default value)
+ssl-cipher                        (No default value)
+ssl-key                           (No default value)
+ssl-crl                           (No default value)
+ssl-crlpath                       (No default value)
+tls-version                       (No default value)
+ssl-verify-server-cert            FALSE
+table                             FALSE
+user                              root
+safe-updates                      FALSE
+i-am-a-dummy                      FALSE
+connect-timeout                   0
+max-allowed-packet                16777216
+net-buffer-length                 16384
+select-limit                      1000
+max-join-size                     1000000
+secure-auth                       FALSE
+show-warnings                     FALSE
+plugin-dir                        (No default value)
+default-auth                      (No default value)
+binary-mode                       FALSE
+connect-expired-password          FALSE

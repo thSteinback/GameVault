@@ -184,5 +184,98 @@
       carregar();
     })();
   </script>
+  <script>
+    /* ── Favoritar ── */
+    (function () {
+      const API = 'http://localhost:3000';
+      const id  = new URLSearchParams(location.search).get('id');
+      const btn = document.getElementById('btn-favoritar');
+      if (!id || !btn) return;
+
+      const usuarioLogado = localStorage.getItem('usuarioLogado');
+
+      function aplicarEstado(fav) {
+        btn.dataset.fav = fav ? '1' : '0';
+        btn.style.filter = fav ? 'none' : 'grayscale(100%)';
+        btn.style.opacity = fav ? '1' : '0.55';
+        btn.title = fav ? 'Remover dos favoritos' : 'Favoritar';
+      }
+
+      // estado inicial
+      if (usuarioLogado) {
+        fetch(`${API}/favoritos/status?nome=${encodeURIComponent(usuarioLogado)}&jogo=${id}`)
+          .then(r => r.json())
+          .then(d => aplicarEstado(!!d.favoritado))
+          .catch(() => aplicarEstado(false));
+      } else {
+        aplicarEstado(false);
+      }
+
+      btn.addEventListener('click', () => {
+        if (!usuarioLogado) { alert('Faça login para favoritar.'); return; }
+        fetch(`${API}/favoritos/toggle`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome: usuarioLogado, jogo: id })
+        })
+          .then(r => r.json())
+          .then(d => { if (d && typeof d.favoritado === 'boolean') aplicarEstado(d.favoritado); })
+          .catch(() => alert('Erro ao favoritar.'));
+      });
+    })();
+  </script>
+  <script>
+    /* ── Avaliação por estrelas (1 a 5) ── */
+    (function () {
+      const API = 'http://localhost:3000';
+      const id  = new URLSearchParams(location.search).get('id');
+      const cont = document.getElementById('estrelas');
+      if (!id || !cont) return;
+      const usuarioLogado = localStorage.getItem('usuarioLogado');
+
+      cont.innerHTML =
+        '<div class="estrelas-aval" style="font-size:28px;letter-spacing:4px;color:#f5c518;cursor:pointer;line-height:1;">' +
+        [1,2,3,4,5].map(v => `<span data-v="${v}">&#9734;</span>`).join('') +
+        '</div><div id="aval-info" style="font-size:13px;color:#bbb;margin-top:6px;">Carregando...</div>';
+
+      const spans = [...cont.querySelectorAll('span[data-v]')];
+      const info  = cont.querySelector('#aval-info');
+      let media = 0, total = 0, minhaNota = 0;
+
+      const pintar = n => spans.forEach(s => s.innerHTML = (Number(s.dataset.v) <= n) ? '&#9733;' : '&#9734;');
+      const base   = () => pintar(minhaNota || Math.round(media));
+      function infoTxt() {
+        if (total > 0) {
+          info.textContent = `Média ${media.toFixed(1)} / 5 (${total} ${total === 1 ? 'avaliação' : 'avaliações'})`
+            + (minhaNota ? ` · sua nota: ${minhaNota}` : '');
+        } else {
+          info.textContent = 'Seja o primeiro a avaliar!';
+        }
+      }
+
+      spans.forEach(s => {
+        s.addEventListener('mouseenter', () => pintar(Number(s.dataset.v)));
+        s.addEventListener('mouseleave', base);
+        s.addEventListener('click', () => {
+          if (!usuarioLogado) { alert('Faça login para avaliar.'); return; }
+          const nota = Number(s.dataset.v);
+          fetch(`${API}/jogos/${id}/avaliacoes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome: usuarioLogado, nota })
+          })
+            .then(async r => { const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.erro || 'Erro'); return d; })
+            .then(d => { media = d.media || 0; total = d.total || 0; minhaNota = d.minhaNota || nota; base(); infoTxt(); })
+            .catch(e => alert(e.message || 'Erro ao avaliar.'));
+        });
+      });
+
+      const q = usuarioLogado ? `?nome=${encodeURIComponent(usuarioLogado)}` : '';
+      fetch(`${API}/jogos/${id}/avaliacoes${q}`)
+        .then(r => r.json())
+        .then(d => { media = d.media || 0; total = d.total || 0; minhaNota = d.minhaNota || 0; base(); infoTxt(); })
+        .catch(() => { info.textContent = 'Erro ao carregar avaliações.'; });
+    })();
+  </script>
 </body>
 </html>
