@@ -717,3 +717,77 @@ input.erro-input {
   .analise { flex-direction: column; }
   .analise .capa { width: 100%; height: auto; max-height: 220px; object-fit: cover; }
 }
+
+/* ===========================================================
+   PÁGINA DE DETALHE DO JOGO (descJogo) — layout dedicado
+   =========================================================== */
+.background-container {
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.background-container .overlay {
+  min-height: 100vh;
+  background: rgba(12, 12, 18, 0.85);
+  backdrop-filter: blur(8px);
+}
+.detalhes-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 60px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  color: #f0f0f0;
+}
+/* Bloco capa + avaliação lado a lado */
+.detalhes-container .jogo-info {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+/* Capa em tamanho fixo de pôster */
+#capa-jogo {
+  width: 240px;
+  height: 340px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  flex: 0 0 auto;
+  background: #1b1b22;
+}
+.detalhes-container .avaliacao {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+.detalhes-container .avaliacao h3 { margin: 0; }
+.detalhes-container .acoes {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+.detalhes-container .acoes button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+}
+.detalhes-container .acoes button img { width: 18px; height: 18px; }
+.detalhes-container .jogo-sinopse { width: 100%; }
+.detalhes-container .jogo-sinopse h2 { margin: 0 0 10px; font-size: 28px; }
+.detalhes-container .jogo-sinopse p { line-height: 1.6; color: #ddd; }
+.detalhes-container .jogo-comentarios { width: 100%; }
+
+@media (max-width: 600px) {
+  .detalhes-container .jogo-info { justify-content: center; }
+  #capa-jogo { width: 180px; height: 256px; }
+}
