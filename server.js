@@ -17,11 +17,28 @@ const adminRoutes      = require('./routes/adminRoutes');
 const app  = express();
 const port = process.env.PORT || 3000;
 
+/* View engine (EJS) — header/footer/modais ficam em views/partials */
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
 /* Middlewares globais */
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));      // serve os .html, css, js, imagens
 app.use('/uploads', express.static('uploads'));     // imagens enviadas
+
+/* Páginas renderizadas via EJS (mantêm as mesmas URLs .html) */
+const paginas = {
+  '/': 'index', '/index.html': 'index',
+  '/jogos.html': 'jogos',
+  '/descJogo.html': 'descJogo',
+  '/favoritos.html': 'favoritos',
+  '/perfilp.html': 'perfilp',
+  '/perfilo.html': 'perfilo'
+};
+for (const [url, view] of Object.entries(paginas)) {
+  app.get(url, (req, res) => res.render(view));
+}
 
 /* Rotas públicas */
 app.use('/', authRoutes);          // /cadastrar, /login, /verificar-admin

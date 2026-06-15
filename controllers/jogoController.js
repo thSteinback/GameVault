@@ -16,6 +16,12 @@ exports.detalhe = async (req, res) => {
   } catch (e) { console.error(e); res.status(500).json({ erro: 'Falha ao buscar jogo' }); }
 };
 
+/* GET /jogos/top -> destaques da home */
+exports.top = async (req, res) => {
+  try { const [rows] = await Jogo.topAvaliados(12); res.json(rows); }
+  catch (e) { console.error(e); res.status(500).json({ erro: 'Falha ao listar destaques' }); }
+};
+
 /* Admin */
 exports.listarAdmin = async (req, res) => {
   try { const [rows] = await Jogo.listarAdmin(); res.json(rows); }

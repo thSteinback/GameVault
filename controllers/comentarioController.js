@@ -29,3 +29,8 @@ exports.excluir = async (req, res) => {
   try { await Comentario.excluir(req.params.id); res.json({ msg: 'Comentário removido' }); }
   catch (e) { console.error(e); res.status(500).json({ erro: 'Falha ao remover comentário' }); }
 };
+
+exports.recentes = async (req, res) => {
+  try { const [rows] = await Comentario.recentes(6); res.json(rows); }
+  catch (e) { console.error(e); res.status(500).json({ erro: 'Falha ao listar análises' }); }
+};

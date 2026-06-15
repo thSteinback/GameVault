@@ -1,3 +1,22 @@
+/* ── Toast (Passo 7): substitui os alert() de feedback ── */
+function toast(msg, tipo) {
+  let c = document.getElementById('gv-toasts');
+  if (!c) {
+    c = document.createElement('div');
+    c.id = 'gv-toasts';
+    c.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:10px;';
+    document.body.appendChild(c);
+  }
+  const cor = tipo === 'erro' ? '#5a1f1f' : (tipo === 'ok' ? '#1f5a2f' : '#2a2a35');
+  const brd = tipo === 'erro' ? '#ff9b9b' : (tipo === 'ok' ? '#9bffb0' : '#8C8CFF');
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = `background:${cor};color:#fff;border-left:4px solid ${brd};padding:12px 16px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.35);font-size:14px;max-width:320px;opacity:0;transform:translateX(20px);transition:.25s;`;
+  c.appendChild(t);
+  requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'none'; });
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(20px)'; setTimeout(() => t.remove(), 250); }, 3200);
+}
+
 // BLOQUEIO DE ACESSO SE NÃO ESTIVER LOGADO NA PÁGINA DE PERFIL
 document.addEventListener("DOMContentLoaded", function () {
   // Só bloqueia caso esteja na página de perfil
@@ -163,7 +182,7 @@ if (btnLogin) {
         exibirErro(senha, "Credenciais Inválidas", erroSenha);
       }
     } catch (err) {
-      alert("Erro de conexão com o servidor!");
+      toast("Erro de conexão com o servidor!", "erro");
     }
   });
 }
@@ -229,7 +248,7 @@ if (btnCadastro) {
 
       const data = await resp.json();
       if (data.success) {
-        alert("Cadastro realizado com sucesso!");
+        toast("Cadastro realizado com sucesso!", "ok");
         document.getElementById("cadastroModal").style.display = "none";
         email.value = "";
         usuario.value = "";
@@ -240,10 +259,10 @@ if (btnCadastro) {
         if (/e-mail/i.test(msg)) exibirErro(email, msg, erroEmail);
         else if (/senha/i.test(msg)) exibirErro(senha, msg, erroSenha);
         else if (/nome|usu/i.test(msg)) exibirErro(usuario, msg, erroUsuario);
-        else alert(msg);
+        else toast(msg, "erro");
       }
     } catch (err) {
-      alert("Erro de conexão com o servidor!");
+      toast("Erro de conexão com o servidor!", "erro");
     }
   });
 }
@@ -394,7 +413,7 @@ if (formAvatar) {
 
     const usuarioLogado = localStorage.getItem('usuarioLogado');
     if (!usuarioLogado) {
-      alert('Usuário não autenticado');
+      toast('Usuário não autenticado', 'erro');
       return;
     }
 
@@ -411,9 +430,9 @@ if (formAvatar) {
     const resultado = await resposta.json();
     if (resultado.success) {
       document.querySelector('.avatar').src = resultado.avatarPath;
-      alert('Avatar alterado com sucesso!');
+      toast('Avatar alterado com sucesso!', 'ok');
     } else {
-      alert('Erro ao atualizar avatar.');
+      toast('Erro ao atualizar avatar.', 'erro');
     }
   });
 }
@@ -426,7 +445,7 @@ if (formBanner) {
 
     const usuarioLogado = localStorage.getItem('usuarioLogado');
     if (!usuarioLogado) {
-      alert('Usuário não autenticado');
+      toast('Usuário não autenticado', 'erro');
       return;
     }
 
@@ -445,9 +464,9 @@ if (formBanner) {
       document.querySelector('.perfil-banner').style.backgroundImage = `url('${resultado.bannerPath}')`;
       document.querySelector('.perfil-banner').style.backgroundSize = "cover";
       document.querySelector('.perfil-banner').style.backgroundPosition = "center";
-      alert('Fundo alterado com sucesso!');
+      toast('Fundo alterado com sucesso!', 'ok');
     } else {
-      alert('Erro ao atualizar fundo.');
+      toast('Erro ao atualizar fundo.', 'erro');
     }
   });
 

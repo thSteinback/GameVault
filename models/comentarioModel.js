@@ -28,3 +28,15 @@ exports.excluirVarios = (ids) =>
 
 exports.contarPorUsuario = (usuCod) =>
   pool.execute('SELECT COUNT(*) AS total FROM comentarios WHERE USU_COD = ?', [usuCod]);
+
+// Comentários recentes com jogo e autor — para a home ("análises populares")
+exports.recentes = (limite) =>
+  pool.query(
+    `SELECT c.COM_TEXTO, c.COM_DATA, u.USU_NOME, j.JOG_COD, j.JOG_NOME, j.JOG_IMG
+       FROM comentarios c
+       JOIN usuarios u ON u.USU_COD = c.USU_COD
+       JOIN jogos    j ON j.JOG_COD = c.JOG_COD
+      WHERE j.JOG_ATIVO = 1
+      ORDER BY c.COM_DATA DESC
+      LIMIT ` + (Number(limite) || 6)
+  );
