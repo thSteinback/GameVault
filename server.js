@@ -51,6 +51,10 @@ app.use('/jogos', jogoRoutes);     // /jogos, /jogos/:id
 /* Rotas administrativas (token + privilégio de admin) */
 app.use('/admin', auth, isAdmin, adminRoutes);
 
-app.listen(port, () => console.log(`Servidor rodando em http://localhost:${port}`));
+/* Só sobe o servidor quando executado diretamente (node server.js).
+   Quando importado por testes, apenas exporta o app. */
+if (require.main === module) {
+  app.listen(port, () => console.log(`Servidor rodando em http://localhost:${port}`));
+}
 
 module.exports = app;

@@ -18,7 +18,7 @@
   },
   "scripts": {
     "start": "node server.js",
-    "test": "mocha",
-    "test:front": "jest"
+    "test": "mocha test/usuario.test.js --exit",
+    "test:front": "jest test/utils.test.js"
   }
 }
