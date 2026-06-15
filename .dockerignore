@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log*
+.git
+.gitignore
+.env
+.env.*
+uploads/*
+!uploads/.gitkeep
+test
+.github
+*.md
+*.sql
+DUMPS*

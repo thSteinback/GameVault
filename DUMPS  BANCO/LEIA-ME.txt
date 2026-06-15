@@ -1,1 +1,0 @@
-Pasta criada para os DUMPS serem efetivados apenas em 1 máquina (Atualmente o desenvolvedor do projeto utiliza MYSQL e trabalha através de 3 máquinas diferentes, mas como é esquecido ele não sobe o banco toda vez que precisa).
