@@ -77,3 +77,6 @@ exports.desbanir = (usuCod) =>
 
 exports.registrarLog = (usuCod, acao) =>
   pool.execute('INSERT INTO logsacoes (USU_COD, LOG_ACAO) VALUES (?, ?)', [usuCod, acao]);
+
+exports.perfilPorNome = (nome) =>
+  pool.execute('SELECT USU_COD, USU_NOME, USU_DATA_CRIACAO, USU_AVATAR, USU_BANNER FROM usuarios WHERE USU_NOME = ?', [nome]);

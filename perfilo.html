@@ -94,5 +94,55 @@
 
   <!-- modais e script.js permanecem iguais -->
   <script src="script.js"></script>
+  <script>
+    /* ── Perfil de visualização (somente leitura) ── */
+    (function () {
+      const API = 'http://localhost:3000';
+      const FALLBACK = 'imagens/logoGV.png';
+      const alvo = new URLSearchParams(location.search).get('nome') || localStorage.getItem('usuarioLogado');
+
+      const elNome = document.querySelector('.username');
+      const elMembro = document.querySelector('.membro');
+      const elAvatar = document.querySelector('.avatar');
+      const nums = document.querySelectorAll('.stats-container .stat .number');
+      const cont = document.querySelector('.favoritos-games');
+
+      if (!alvo) { if (elNome) elNome.textContent = 'Usuário não informado'; return; }
+
+      fetch(`${API}/usuario-perfil?nome=${encodeURIComponent(alvo)}`)
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(d => {
+          if (elNome) elNome.textContent = d.nome || alvo;
+          if (elMembro && d.membroDesde) {
+            const ano = new Date(d.membroDesde).getFullYear();
+            elMembro.textContent = 'Membro desde ' + (isNaN(ano) ? '—' : ano);
+          }
+          if (elAvatar) { elAvatar.src = d.avatar || FALLBACK; elAvatar.onerror = () => { elAvatar.onerror = null; elAvatar.src = FALLBACK; }; }
+          if (nums[0]) nums[0].textContent = d.favoritos ?? 0;
+          if (nums[1]) nums[1].textContent = d.avaliacoes ?? 0;
+          if (nums[2]) nums[2].textContent = d.comentarios ?? 0;
+          document.title = `GameVault — ${d.nome || alvo}`;
+        })
+        .catch(() => { if (elNome) elNome.textContent = 'Usuário não encontrado'; });
+
+      if (cont) {
+        fetch(`${API}/favoritos?nome=${encodeURIComponent(alvo)}`)
+          .then(r => r.json())
+          .then(jogos => {
+            if (!Array.isArray(jogos) || !jogos.length) {
+              cont.innerHTML = '<p style="color:#aaa;">Nenhum jogo favoritado.</p>';
+              return;
+            }
+            cont.innerHTML = jogos.slice(0, 6).map(j => {
+              const img = j.JOG_IMG ? `${API}/uploads/${j.JOG_IMG}` : FALLBACK;
+              const nome = (j.JOG_NOME || 'Jogo').replace(/"/g, '&quot;');
+              return `<div class="game-card"><a href="descJogo.html?id=${j.JOG_COD}">
+                        <img src="${img}" alt="${nome}" onerror="this.onerror=null;this.src='${FALLBACK}'" /></a></div>`;
+            }).join('');
+          })
+          .catch(() => {});
+      }
+    })();
+  </script>
 </body>
 </html>

@@ -25,3 +25,6 @@ exports.listarTodosComAutor = () =>
 
 exports.excluirVarios = (ids) =>
   pool.query('DELETE FROM comentarios WHERE COM_COD IN (?)', [ids]);
+
+exports.contarPorUsuario = (usuCod) =>
+  pool.execute('SELECT COUNT(*) AS total FROM comentarios WHERE USU_COD = ?', [usuCod]);

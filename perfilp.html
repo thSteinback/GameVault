@@ -102,5 +102,49 @@
   </footer>
 
   <script src="script.js"></script>
+  <script>
+    /* ── Estatísticas e favoritos reais do perfil ── */
+    (function () {
+      const API = 'http://localhost:3000';
+      const FALLBACK = 'imagens/logoGV.png';
+      const usuarioLogado = localStorage.getItem('usuarioLogado');
+      if (!usuarioLogado) return;
+
+      const nums = document.querySelectorAll('.stats-container .stat .number');
+      // ordem no HTML: [0] Favoritos, [1] Avaliações, [2] Comentários
+      fetch(`${API}/usuario-perfil?nome=${encodeURIComponent(usuarioLogado)}`)
+        .then(r => r.json())
+        .then(d => {
+          if (d && !d.erro) {
+            if (nums[0]) nums[0].textContent = d.favoritos ?? 0;
+            if (nums[1]) nums[1].textContent = d.avaliacoes ?? 0;
+            if (nums[2]) nums[2].textContent = d.comentarios ?? 0;
+          }
+        })
+        .catch(() => {});
+
+      const cont = document.querySelector('.favoritos-games');
+      if (cont) {
+        fetch(`${API}/favoritos?nome=${encodeURIComponent(usuarioLogado)}`)
+          .then(r => r.json())
+          .then(jogos => {
+            if (!Array.isArray(jogos) || !jogos.length) {
+              cont.innerHTML = '<p style="color:#aaa;">Nenhum jogo favoritado ainda.</p>';
+              return;
+            }
+            cont.innerHTML = jogos.slice(0, 6).map(j => {
+              const img = j.JOG_IMG ? `${API}/uploads/${j.JOG_IMG}` : FALLBACK;
+              const nome = (j.JOG_NOME || 'Jogo').replace(/"/g, '&quot;');
+              return `<div class="game-card">
+                        <a href="descJogo.html?id=${j.JOG_COD}">
+                          <img src="${img}" alt="${nome}" onerror="this.onerror=null;this.src='${FALLBACK}'" />
+                        </a>
+                      </div>`;
+            }).join('');
+          })
+          .catch(() => {});
+      }
+    })();
+  </script>
 </body>
 </html>

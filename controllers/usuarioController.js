@@ -1,4 +1,28 @@
-const Usuario = require('../models/usuarioModel');
+const Usuario    = require('../models/usuarioModel');
+const Favorito   = require('../models/favoritoModel');
+const Avaliacao  = require('../models/avaliacaoModel');
+const Comentario = require('../models/comentarioModel');
+
+/* GET /usuario-perfil?nome=...  -> dados do perfil + contadores */
+exports.perfil = async (req, res) => {
+  try {
+    const [r] = await Usuario.perfilPorNome(req.query.nome);
+    if (!r.length) return res.status(404).json({ erro: 'Usuário não encontrado' });
+    const u = r[0];
+    const [[fav]] = await Favorito.contarPorUsuario(u.USU_COD);
+    const [[ava]] = await Avaliacao.contarPorUsuario(u.USU_COD);
+    const [[com]] = await Comentario.contarPorUsuario(u.USU_COD);
+    res.json({
+      nome: u.USU_NOME,
+      membroDesde: u.USU_DATA_CRIACAO,
+      avatar: u.USU_AVATAR ? `/uploads/${u.USU_AVATAR}` : 'imagens/oMimico.png',
+      banner: u.USU_BANNER ? `/uploads/${u.USU_BANNER}` : '',
+      favoritos: fav.total,
+      avaliacoes: ava.total,
+      comentarios: com.total
+    });
+  } catch (e) { console.error(e); res.status(500).json({ erro: 'Falha ao carregar perfil' }); }
+};
 
 exports.uploadAvatar = async (req, res) => {
   try {
