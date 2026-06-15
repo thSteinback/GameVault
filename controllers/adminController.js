@@ -30,7 +30,7 @@ exports.moderar = async (req, res) => {
       porUsuario[c.USU_COD].qtd++;
       porUsuario[c.USU_COD].grave = porUsuario[c.USU_COD].grave || r.grave;
       r.termos.forEach(t => porUsuario[c.USU_COD].termos.add(t));
-      detalhes.push({ usuario: c.USU_NOME, grave: r.grave, termos: r.termos });
+      detalhes.push({ usuario: c.USU_NOME, texto: c.COM_TEXTO, grave: r.grave, termos: r.termos });
     }
 
     if (aRemover.length) await Comentario.excluirVarios(aRemover);
@@ -64,4 +64,20 @@ exports.desbanir = async (req, res) => {
     await Usuario.registrarLog(req.params.id, 'Desbanido manualmente pelo admin');
     res.json({ msg: 'Usuário desbanido' });
   } catch (e) { console.error(e); res.status(500).json({ erro: 'Falha ao desbanir' }); }
+};
+
+exports.promover = async (req, res) => {
+  try {
+    await Usuario.promover(req.params.id);
+    await Usuario.registrarLog(req.params.id, 'Promovido a administrador pelo admin');
+    res.json({ msg: 'Usuário promovido a administrador' });
+  } catch (e) { console.error(e); res.status(500).json({ erro: 'Falha ao promover' }); }
+};
+
+exports.rebaixar = async (req, res) => {
+  try {
+    await Usuario.rebaixar(req.params.id);
+    await Usuario.registrarLog(req.params.id, 'Rebaixado para usuário comum pelo admin');
+    res.json({ msg: 'Usuário rebaixado' });
+  } catch (e) { console.error(e); res.status(500).json({ erro: 'Falha ao rebaixar' }); }
 };

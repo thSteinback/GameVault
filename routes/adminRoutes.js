@@ -13,5 +13,7 @@ router.delete('/usuarios/:id', admin.excluirUsuario);
 
 router.post('/moderar', admin.moderar);
 router.post('/usuarios/:id/desbanir', admin.desbanir);
+router.post('/usuarios/:id/promover', admin.promover);
+router.post('/usuarios/:id/rebaixar', admin.rebaixar);
 
 module.exports = router;

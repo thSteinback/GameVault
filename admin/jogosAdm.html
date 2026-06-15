@@ -367,9 +367,10 @@
     }
     async function confirmar() {
       if (!pendingId) return;
+      const id = pendingId;        // captura ANTES de fechar (fecharConfirm zera o pendingId)
       fecharConfirm();
       try {
-        const r = await adminFetch(`${BASE}/admin/jogos/${pendingId}`, { method: 'DELETE' });
+        const r = await adminFetch(`${BASE}/admin/jogos/${id}`, { method: 'DELETE' });
         if (r.ok) { toast('✅ Jogo excluído!'); carregarJogos(); }
         else toast('❌ Erro ao excluir.');
       } catch { toast('❌ Erro de conexão!'); }

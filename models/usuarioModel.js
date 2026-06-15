@@ -35,7 +35,7 @@ exports.listarTodosComAdmins = () =>
   pool.query(
     `SELECT u.USU_COD AS id, u.USU_NOME AS nome, u.USU_EMAIL AS email,
             u.USU_AVATAR AS avatar, u.USU_DATA_CRIACAO AS dataCriacao,
-            0 AS isAdmin,
+            CASE WHEN u.USU_TIPO = 'admin' THEN 1 ELSE 0 END AS isAdmin,
             COALESCE(p.PERM_BANIDO, 0)  AS banido,
             COALESCE(p.PERM_STRIKES, 0) AS strikes
        FROM usuarios u
@@ -80,3 +80,9 @@ exports.registrarLog = (usuCod, acao) =>
 
 exports.perfilPorNome = (nome) =>
   pool.execute('SELECT USU_COD, USU_NOME, USU_DATA_CRIACAO, USU_AVATAR, USU_BANNER FROM usuarios WHERE USU_NOME = ?', [nome]);
+
+exports.promover = (id) =>
+  pool.execute("UPDATE usuarios SET USU_TIPO = 'admin' WHERE USU_COD = ?", [id]);
+
+exports.rebaixar = (id) =>
+  pool.execute("UPDATE usuarios SET USU_TIPO = 'usuario' WHERE USU_COD = ?", [id]);

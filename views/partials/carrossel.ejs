@@ -1,0 +1,39 @@
+<!-- Carrossel reutilizável: "Jogos mais avaliados" (dinâmico, vindo do banco) -->
+<div class="top-jogos-wrapper" style="position:relative;max-width:1100px;margin:0 auto;">
+  <button class="nav left" data-carrossel-prev style="position:absolute;left:-6px;top:50%;transform:translateY(-50%);z-index:2;cursor:pointer;">&#10094;</button>
+  <div class="carrossel-faixa" style="display:flex;gap:16px;overflow-x:auto;scroll-behavior:smooth;padding:10px 28px;">
+    <p style="color:#aaa;">Carregando...</p>
+  </div>
+  <button class="nav right" data-carrossel-next style="position:absolute;right:-6px;top:50%;transform:translateY(-50%);z-index:2;cursor:pointer;">&#10095;</button>
+</div>
+<script>
+  (function () {
+    const API = 'http://localhost:3000';
+    const FALLBACK = 'imagens/logoGV.png';
+    const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; };
+    const estrelas = m => { m = Math.round(m || 0); let h = ''; for (let i = 1; i <= 5; i++) h += (i <= m ? '\u2605' : '\u2606'); return h; };
+
+    // Encontra o próprio wrapper deste include (sem depender de IDs fixos)
+    const wrapper = document.currentScript.previousElementSibling;
+    const faixa = wrapper.querySelector('.carrossel-faixa');
+    const prev  = wrapper.querySelector('[data-carrossel-prev]');
+    const next  = wrapper.querySelector('[data-carrossel-next]');
+
+    fetch(`${API}/jogos/top`).then(r => r.json()).then(js => {
+      if (!Array.isArray(js) || !js.length) { faixa.innerHTML = '<p style="color:#aaa;">Nenhum jogo cadastrado ainda.</p>'; return; }
+      faixa.innerHTML = js.map(j => {
+        const img = j.JOG_IMG ? `${API}/uploads/${j.JOG_IMG}` : FALLBACK;
+        const nome = esc(j.JOG_NOME || 'Jogo');
+        const media = j.media ? Number(j.media) : 0;
+        return `<a href="descJogo.html?id=${j.JOG_COD}" style="flex:0 0 auto;width:150px;text-decoration:none;color:inherit;">
+                  <img src="${img}" alt="${nome}" onerror="this.onerror=null;this.src='${FALLBACK}'" style="width:150px;height:200px;object-fit:cover;border-radius:8px;display:block;" />
+                  <p style="margin:6px 0 0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${nome}</p>
+                  <span style="color:#f5c518;font-size:13px;">${estrelas(media)} ${media > 0 ? media.toFixed(1) : ''}</span>
+                </a>`;
+      }).join('');
+    }).catch(() => { faixa.innerHTML = '<p style="color:#aaa;">Erro ao carregar.</p>'; });
+
+    if (prev) prev.onclick = () => faixa.scrollBy({ left: -330, behavior: 'smooth' });
+    if (next) next.onclick = () => faixa.scrollBy({ left: 330, behavior: 'smooth' });
+  })();
+</script>
